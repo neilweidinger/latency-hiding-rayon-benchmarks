@@ -22,7 +22,7 @@ impl std::fmt::Display for Params {
 }
 
 pub fn param_sweep(c: &mut Criterion) {
-    let mut latency_ms_sweep = c.benchmark_group("Latency Time/P Sweep");
+    let mut latency_ms_sweep = c.benchmark_group("Latency Time and P Sweep");
 
     for latency_ms in LATENCY_MS {
         for latency_p in LATENCY_P {
