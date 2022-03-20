@@ -18,9 +18,5 @@ rayon = {path = "../rayon"}
 # rayon = { git = "https://github.com/rayon-rs/rayon", tag = "v1.5.1" }
 
 [[bench]]
-name = "fib_bench"
-harness = false
-
-[[bench]]
-name = "quicksort_bench"
+name = "param_sweep"
 harness = false
