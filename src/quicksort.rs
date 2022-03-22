@@ -46,26 +46,12 @@ pub fn quicksort<T: Ord + Send, J: Joiner>(input: &mut [T], latency_ms: u64, lat
     }
 }
 
-pub fn quicksort_latency<T: Ord + Send>(input: &mut [T], latency_ms: u64, latency_p: f32) {
-    if input.len() <= SERIAL_CUTOFF {
-        input.sort_unstable();
-    } else {
-        if incurs_latency(latency_p) {
-            std::thread::sleep(Duration::from_millis(latency_ms));
-        }
-
-        let mid = partition(input);
-        let (left, right) = input.split_at_mut(mid);
-
-        rayon::join_async(
-            quicksort_latency_helper(left, latency_ms, latency_p),
-            quicksort_latency_helper(right, latency_ms, latency_p),
-        );
-    }
-}
-
 #[async_recursion]
-async fn quicksort_latency_helper<T: Ord + Send>(input: &mut [T], latency_ms: u64, latency_p: f32) {
+pub async fn quicksort_latency_hiding<T: Ord + Send>(
+    input: &mut [T],
+    latency_ms: u64,
+    latency_p: f32,
+) {
     if input.len() <= SERIAL_CUTOFF {
         input.sort_unstable();
     } else {
@@ -77,8 +63,8 @@ async fn quicksort_latency_helper<T: Ord + Send>(input: &mut [T], latency_ms: u6
         let (left, right) = input.split_at_mut(mid);
 
         rayon::join_async(
-            quicksort_latency_helper(left, latency_ms, latency_p),
-            quicksort_latency_helper(right, latency_ms, latency_p),
+            quicksort_latency_hiding(left, latency_ms, latency_p),
+            quicksort_latency_hiding(right, latency_ms, latency_p),
         );
     }
 }

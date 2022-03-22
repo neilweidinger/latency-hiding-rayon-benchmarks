@@ -9,10 +9,6 @@ pub fn fib<J: Joiner>(n: u32, latency_ms: u64, latency_p: f32) -> (u32, u32) {
         return (n, 1);
     }
 
-    // if n < 10 && J::is_parallel() {
-    //     return fib::<Serial>(n); // cross over to serial execution
-    // }
-
     // TODO: branch prediction overhead?
     if incurs_latency(latency_p) {
         std::thread::sleep(Duration::from_millis(latency_ms));
@@ -26,25 +22,8 @@ pub fn fib<J: Joiner>(n: u32, latency_ms: u64, latency_p: f32) -> (u32, u32) {
     (ra.0 + rb.0, ra.1 + rb.1 + 1)
 }
 
-pub fn fib_latency(n: u32, latency_ms: u64, latency_p: f32) -> (u32, u32) {
-    if n <= 1 {
-        return (n, 1);
-    }
-
-    if incurs_latency(latency_p) {
-        std::thread::sleep(Duration::from_millis(latency_ms));
-    }
-
-    let (ra, rb) = rayon::join_async(
-        fib_latency_helper(n - 1, latency_ms, latency_p),
-        fib_latency_helper(n - 2, latency_ms, latency_p),
-    );
-
-    (ra.0 + rb.0, ra.1 + rb.1 + 1)
-}
-
 #[async_recursion]
-pub async fn fib_latency_helper(n: u32, latency_ms: u64, latency_p: f32) -> (u32, u32) {
+pub async fn fib_latency_hiding(n: u32, latency_ms: u64, latency_p: f32) -> (u32, u32) {
     if n <= 1 {
         return (n, 1);
     }
@@ -54,8 +33,8 @@ pub async fn fib_latency_helper(n: u32, latency_ms: u64, latency_p: f32) -> (u32
     }
 
     let (ra, rb) = rayon::join_async(
-        fib_latency_helper(n - 1, latency_ms, latency_p),
-        fib_latency_helper(n - 2, latency_ms, latency_p),
+        fib_latency_hiding(n - 1, latency_ms, latency_p),
+        fib_latency_hiding(n - 2, latency_ms, latency_p),
     );
     // let (ra, rb) = futures::join!(
     //     fib_latency_helper(n - 1, latency),
