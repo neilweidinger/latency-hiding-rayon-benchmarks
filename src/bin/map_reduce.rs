@@ -54,6 +54,6 @@ fn main() {
         map_reduce(&mut ids, &map, &reduce, &identity)
     };
 
-    println!("Max ID: {max_id}");
-    println!("Winner: {winner:?}");
+    println!("Max ID: {}", max_id);
+    println!("Winner: {:?}", winner);
 }
