@@ -47,46 +47,29 @@ where
     REDUCE: Fn(<FUT2 as Future>::Output, <FUT2 as Future>::Output) -> FUT2 + Sync,
     ID: Fn() -> FUT3 + Sync,
     FUT1: Future + Send,
-    <FUT1 as Future>::Output: Send + Into<<FUT2 as Future>::Output> + std::fmt::Debug,
+    <FUT1 as Future>::Output: Send + Into<<FUT2 as Future>::Output>,
     FUT2: Future + Send,
-    <FUT2 as Future>::Output: Send + std::fmt::Debug,
+    <FUT2 as Future>::Output: Send,
     FUT3: Future + Send,
-    <FUT3 as Future>::Output: Send + Into<<FUT2 as Future>::Output> + std::fmt::Debug,
+    <FUT3 as Future>::Output: Send + Into<<FUT2 as Future>::Output>,
 {
     if items.len() == 1 {
-        // let (ra, rb) = rayon::join_async(map(&mut items[0]), identity());
         let (ra, rb) = join!(map(&mut items[0]), identity());
-        println!("ONEEEE {ra:?} {rb:?}");
         return reduce(ra.into(), rb.into()).await;
     } else if items.len() == 2 {
         let (s1, s2) = items.split_at_mut(items.len() / 2);
-        // let (ra, rb) = rayon::join_async(map(&mut s1[0]), map(&mut s2[0]));
         let (ra, rb) = join!(map(&mut s1[0]), map(&mut s2[0]));
-        println!("TWOOOO {ra:?} {rb:?}");
         return reduce(ra.into(), rb.into()).await;
     }
 
     let (s1, s2) = items.split_at_mut(items.len() / 2);
 
-    // let (ra, rb) = rayon::join_async(
-    //     map_reduce_latency_hiding(s1, map, reduce, identity),
-    //     map_reduce_latency_hiding(s2, map, reduce, identity),
-    // );
-    // serial .await works fine
-    // let ra = map_reduce_latency_hiding(s1, map, reduce, identity).await;
-    // let rb = map_reduce_latency_hiding(s2, map, reduce, identity).await;
     let (ra, rb) = join!(
         map_reduce_latency_hiding(s1, map, reduce, identity),
         map_reduce_latency_hiding(s2, map, reduce, identity),
     );
 
-    println!("BROOOOO {ra:?} {rb:?}");
-
-    let r = reduce(ra, rb).await;
-
-    println!("MADE IT {r:?}");
-
-    r
+    reduce(ra, rb).await
 }
 
 /// Just needed so that we can help the borrow checker with specifying lifetimes

@@ -1,6 +1,7 @@
 use crate::{incurs_latency, Joiner};
 use async_io::Timer;
 use async_recursion::async_recursion;
+use futures::join;
 use rand::distributions::Distribution;
 use rand::distributions::Standard;
 use std::time::Duration;
@@ -62,7 +63,7 @@ pub async fn quicksort_latency_hiding<T: Ord + Send>(
         let mid = partition(input);
         let (left, right) = input.split_at_mut(mid);
 
-        rayon::join_async(
+        join!(
             quicksort_latency_hiding(left, latency_ms, latency_p),
             quicksort_latency_hiding(right, latency_ms, latency_p),
         );

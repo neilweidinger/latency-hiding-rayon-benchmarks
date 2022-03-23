@@ -30,7 +30,6 @@ fn main() {
 
     let mut ids = generate_random_ids(args.n);
     let max_id = *ids.iter().max().unwrap();
-    println!("IDs: {:?}", ids);
 
     let winner = if args.hide_latency {
         let map =

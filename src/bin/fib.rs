@@ -32,7 +32,5 @@ fn main() {
         fib::<Parallel>(args.n, args.latency_ms, args.latency_p)
     };
 
-    // std::thread::sleep(std::time::Duration::from_secs(4));
-
     println!("result: {} calls: {}", fib, calls);
 }

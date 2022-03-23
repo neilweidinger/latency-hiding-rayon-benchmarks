@@ -1,4 +1,5 @@
 use async_io::Timer;
+use futures::join;
 use std::time::Duration;
 
 async fn future_1() {
@@ -15,6 +16,6 @@ async fn future_2() {
 
 fn main() {
     println!("Starting...");
-    rayon::join_async(future_1(), future_2());
+    rayon::spawn_blocking_future(async { join!(future_1(), future_2()) });
     println!("Finished!");
 }
