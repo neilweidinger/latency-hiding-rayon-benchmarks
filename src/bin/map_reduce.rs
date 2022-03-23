@@ -1,11 +1,10 @@
 use benchmarks::map_reduce::example::{
-    identity_classic, identity_latency_hiding, map_classic, map_latency_hiding, reduce_classic,
-    reduce_latency_hiding,
+    generate_random_ids, identity_classic, identity_latency_hiding, map_classic,
+    map_latency_hiding, reduce_classic, reduce_latency_hiding,
 };
 use benchmarks::map_reduce::{map_constrain, map_reduce, map_reduce_latency_hiding};
 use benchmarks::parse_latency_p;
 use clap::Parser;
-use rand::distributions::{Distribution, Uniform};
 
 #[derive(Parser)]
 struct Args {
@@ -17,12 +16,6 @@ struct Args {
     latency_ms: u64,
     #[clap(short = 'p', long, parse(try_from_str = parse_latency_p))]
     latency_p: f32,
-}
-
-fn generate_random_ids(len: usize) -> Vec<usize> {
-    let rng = rand::thread_rng();
-    let dist = Uniform::from(0..=100);
-    dist.sample_iter(rng).take(len).collect()
 }
 
 fn main() {

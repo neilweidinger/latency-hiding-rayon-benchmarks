@@ -84,6 +84,7 @@ where
 pub mod example {
     use crate::incurs_latency;
     use async_io::Timer;
+    use rand::distributions::{Distribution, Uniform};
     use std::time::Duration;
 
     type Player = (usize, i32); // ID, estimated score
@@ -138,7 +139,19 @@ pub mod example {
             Timer::after(Duration::from_millis(latency_ms)).await;
         }
 
-        (*id, ((*id).checked_mul(2).unwrap().try_into().unwrap())) // (id, predicted score)
+        // Do some CPU bound work (to get Rayon to create more jobs and all threads to have
+        // something to do)
+        // let mut v = generate_random_ids(100000);
+        // crate::quicksort::quicksort::<_, crate::Parallel>(&mut v, 0, 0.0);
+
+        (
+            *id,
+            ((*id + v[50_000])
+                .checked_mul(2)
+                .unwrap()
+                .try_into()
+                .unwrap()),
+        ) // (id, predicted score)
     }
 
     pub async fn reduce_latency_hiding(
@@ -173,5 +186,11 @@ pub mod example {
 
     pub async fn identity_latency_hiding() -> Player {
         IDENTITY
+    }
+
+    pub fn generate_random_ids(len: usize) -> Vec<usize> {
+        let rng = rand::thread_rng();
+        let dist = Uniform::from(0..=100);
+        dist.sample_iter(rng).take(len).collect()
     }
 }
