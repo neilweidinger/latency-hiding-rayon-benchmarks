@@ -30,3 +30,8 @@ harness = false
 [[bench]]
 name = "quicksort"
 harness = false
+
+[profile.custom-profile]
+inherits = "release"
+debug = true
+lto = true
