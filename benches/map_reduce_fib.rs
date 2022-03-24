@@ -11,10 +11,10 @@ where
 
 fn map_reduce_fib(hide_latency: bool, latency_ms: u64) -> u32 {
     let map = constrain(|&mut n| map_reduce_fib::map(n, hide_latency, latency_ms));
-    let mut fib_n = [30; 15];
+    let mut fib_n = [30; 5];
 
     map_reduce(
-        black_box(&mut fib_n),
+        &mut fib_n,
         &map,
         &map_reduce_fib::reduce,
         &map_reduce_fib::identity,
@@ -22,18 +22,22 @@ fn map_reduce_fib(hide_latency: bool, latency_ms: u64) -> u32 {
 }
 
 fn map_reduce_fib_bench(c: &mut Criterion) {
+    let mut map_reduce_fib_group = c.benchmark_group("MapReduce Fib");
+
     for latency_ms in [1, 50, 100, 500] {
-        c.bench_with_input(
-            BenchmarkId::new("MapReduce Fib", format!("Latency - {}", latency_ms)),
+        map_reduce_fib_group.bench_with_input(
+            BenchmarkId::new("Classic", format!("Latency ms - {}", latency_ms)),
             &latency_ms,
-            |b, &l| b.iter(|| map_reduce_fib(false, l)),
+            |b, &l| b.iter(|| map_reduce_fib(false, black_box(l))),
         );
-        c.bench_with_input(
-            BenchmarkId::new("MapReduce Fib LH", format!("Latency - {}", latency_ms)),
+        map_reduce_fib_group.bench_with_input(
+            BenchmarkId::new("Latency Hiding", format!("Latency ms - {}", latency_ms)),
             &latency_ms,
-            |b, &l| b.iter(|| map_reduce_fib(false, l)),
+            |b, &l| b.iter(|| map_reduce_fib(true, black_box(l))),
         );
     }
+
+    map_reduce_fib_group.finish();
 }
 
 criterion_group! {
