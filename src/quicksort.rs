@@ -1,7 +1,6 @@
 use crate::{incurs_latency, Joiner};
 use async_io::Timer;
 use async_recursion::async_recursion;
-use futures::join;
 use rand::distributions::Distribution;
 use rand::distributions::Standard;
 use std::time::Duration;
@@ -63,7 +62,22 @@ pub async fn quicksort_latency_hiding<T: Ord + Send>(
         let mid = partition(input);
         let (left, right) = input.split_at_mut(mid);
 
-        join!(
+        // Call to `join_async` needed to express parallelism: if we just use the join! macro here,
+        // no other FutureJobs get created, meaning no other worker threads can steal to help drive
+        // progress of work. A single future is basically serial in nature, progress is made
+        // through the state machine serially (a future is basically a single cooperative
+        // greenthread. i.e. conceptually a future state machine is like multiple cooperatively
+        // scheduled threads on a single core machine. await points represent points where threads
+        // cooperatively yield, and nested futures are like other threads that can be scheduled on
+        // this single core machine. so calling join! is like spawning multiple threads on this
+        // single core machine - they may run concurrently but never in parallel). A call to the
+        // join! macro means that the futures can execute concurrently (but serially, i.e not in
+        // parallel). That means in order for worker threads to perform additional work in
+        // *parallel* in between suspension points of a given future, (await suspension points mark
+        // points where threads can tend to other jobs, but if we only use the join! macro there
+        // will be no other jobs to tend to) additional FutureJobs need to be created (same idea as
+        // spawning Tasks with Tokio / other executors).
+        rayon::join_async(
             quicksort_latency_hiding(left, latency_ms, latency_p),
             quicksort_latency_hiding(right, latency_ms, latency_p),
         );

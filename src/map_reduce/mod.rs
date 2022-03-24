@@ -1,6 +1,5 @@
 use crate::{Joiner, Parallel};
 use async_recursion::async_recursion;
-use futures::join;
 use std::future::Future;
 
 pub mod map_reduce_fib;
@@ -61,7 +60,7 @@ where
 
     let (s1, s2) = items.split_at_mut(items.len() / 2);
 
-    let (ra, rb) = join!(
+    let (ra, rb) = rayon::join_async(
         map_reduce_latency_hiding(s1, map, reduce, identity),
         map_reduce_latency_hiding(s2, map, reduce, identity),
     );

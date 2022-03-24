@@ -77,6 +77,8 @@ pub enum ParseLatencyPError {
     ParseError,
 }
 
+impl std::error::Error for ParseLatencyPError {}
+
 impl std::fmt::Display for ParseLatencyPError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
@@ -89,8 +91,6 @@ impl std::fmt::Display for ParseLatencyPError {
         }
     }
 }
-
-impl std::error::Error for ParseLatencyPError {}
 
 pub fn parse_latency_p(s: &str) -> Result<f32, ParseLatencyPError> {
     match f32::from_str(s) {
