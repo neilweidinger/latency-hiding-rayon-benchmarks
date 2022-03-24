@@ -26,3 +26,7 @@ harness = false
 [[bench]]
 name = "map_reduce_fib"
 harness = false
+
+[[bench]]
+name = "quicksort"
+harness = false
