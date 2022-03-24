@@ -1,49 +1,15 @@
-use benchmarks::quicksort::{generate_random_sequence, quicksort, quicksort_latency_hiding};
-use benchmarks::{parse_latency_p, Parallel, Serial};
+use benchmarks::quicksort::{generate_random_sequence, quicksort};
+use benchmarks::{parse_execution_mode, ExecutionMode, Parallel, ParallelLH, Serial};
 use clap::Parser;
-
-enum QuicksortMode {
-    LatencyHiding,
-    Parallel,
-    Serial,
-}
-
-fn parse_quicksort_mode(s: &str) -> Result<QuicksortMode, ParseQuicksortModeError> {
-    match s {
-        "latency-hiding" | "l" => Ok(QuicksortMode::LatencyHiding),
-        "parallel" | "p" => Ok(QuicksortMode::Parallel),
-        "serial" | "s" => Ok(QuicksortMode::Serial),
-        _ => Err(ParseQuicksortModeError::ParseError),
-    }
-}
-
-#[derive(Debug)]
-enum ParseQuicksortModeError {
-    ParseError,
-}
-
-impl std::error::Error for ParseQuicksortModeError {}
-
-impl std::fmt::Display for ParseQuicksortModeError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            ParseQuicksortModeError::ParseError => {
-                write!(f, "Argument for quicksort mode could not be parsed")
-            }
-        }
-    }
-}
 
 #[derive(Parser)]
 struct Args {
-    #[clap(short, long, default_value = "1000000")]
+    #[clap(short, long, parse(try_from_str = parse_execution_mode))]
+    mode: ExecutionMode,
+    #[clap(short, long, default_value = "10000000")]
     n: usize,
-    #[clap(short, long, parse(try_from_str = parse_quicksort_mode))]
-    mode: QuicksortMode,
-    #[clap(short = 'l', long)]
-    latency_ms: u64,
-    #[clap(short = 'p', long, parse(try_from_str = parse_latency_p))]
-    latency_p: f32,
+    #[clap(short, long)]
+    latency_ms: Option<u64>,
 }
 
 fn main() {
@@ -53,18 +19,14 @@ fn main() {
     println!("Unsorted: {:?}...{:?}", &v[..3], &v[v.len() - 3..]);
 
     match args.mode {
-        QuicksortMode::LatencyHiding => {
-            rayon::spawn_blocking_future(quicksort_latency_hiding(
-                &mut v,
-                args.latency_ms,
-                args.latency_p,
-            ));
+        ExecutionMode::LatencyHiding => {
+            quicksort::<ParallelLH, _>(&mut v, args.latency_ms);
         }
-        QuicksortMode::Parallel => {
-            quicksort::<_, Parallel>(&mut v, args.latency_ms, args.latency_p);
+        ExecutionMode::Parallel => {
+            quicksort::<Parallel, _>(&mut v, args.latency_ms);
         }
-        QuicksortMode::Serial => {
-            quicksort::<_, Serial>(&mut v, args.latency_ms, args.latency_p);
+        ExecutionMode::Serial => {
+            quicksort::<Serial, _>(&mut v, args.latency_ms);
         }
     }
 

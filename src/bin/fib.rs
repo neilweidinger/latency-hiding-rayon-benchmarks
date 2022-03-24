@@ -1,6 +1,7 @@
 use benchmarks::fib::{fib, fib_latency_hiding};
 use benchmarks::{parse_latency_p, Parallel};
 use clap::Parser;
+use pin_utils::pin_mut;
 
 #[derive(Parser)]
 struct Args {
@@ -19,14 +20,15 @@ fn main() {
 
     let (fib, calls) = if args.hide_latency {
         let mut r: Option<(u32, u32)> = None;
-        // rayon::scope(|s| {
-        //     s.spawn_future(async {
-        //         r = Some(fib_latency_hiding(args.n, args.latency_ms, args.latency_p).await)
-        //     });
-        // });
-        rayon::spawn_blocking_future(async {
-            r = Some(fib_latency_hiding(args.n, args.latency_ms, args.latency_p).await)
-        });
+
+        {
+            let future_job = rayon::FutureJob::new(async {
+                r = Some(fib_latency_hiding(args.n, args.latency_ms, args.latency_p).await)
+            });
+            pin_mut!(future_job);
+            future_job.spawn().await_future_job();
+        }
+
         r.unwrap()
     } else {
         fib::<Parallel>(args.n, args.latency_ms, args.latency_p)

@@ -1,5 +1,6 @@
 use async_io::Timer;
 use futures::join;
+use pin_utils::pin_mut;
 use std::time::Duration;
 
 async fn future_1() {
@@ -16,6 +17,10 @@ async fn future_2() {
 
 fn main() {
     println!("Starting...");
-    rayon::spawn_blocking_future(async { join!(future_1(), future_2()) });
+
+    let future_job = rayon::FutureJob::new(async { join!(future_1(), future_2()) });
+    pin_mut!(future_job);
+    future_job.spawn().await_future_job();
+
     println!("Finished!");
 }
