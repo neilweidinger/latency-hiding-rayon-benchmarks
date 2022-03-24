@@ -21,3 +21,7 @@ rayon = {path = "../rayon"}
 [[bench]]
 name = "param_sweep"
 harness = false
+
+[[bench]]
+name = "map_reduce_fib"
+harness = false

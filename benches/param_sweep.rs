@@ -1,9 +1,4 @@
 use benchmarks::fib::{fib, fib_latency_hiding};
-use benchmarks::map_reduce::example::{
-    generate_random_ids, identity_classic, identity_latency_hiding, map_classic,
-    map_latency_hiding, reduce_classic, reduce_latency_hiding,
-};
-use benchmarks::map_reduce::{map_constrain, map_reduce, map_reduce_latency_hiding};
 use benchmarks::quicksort::{generate_random_sequence, quicksort, quicksort_latency_hiding};
 use benchmarks::Parallel;
 use criterion::measurement::WallTime;
@@ -13,7 +8,6 @@ use criterion::{
 
 const FIB_N: u32 = 8;
 const QSORT_LEN: usize = 1_000_000;
-const MAP_REDUCE_LEN: usize = 100_000;
 
 const LATENCY_MS: [u64; 2] = [0, 20];
 // const LATENCY_MS: [u64; 1] = [20];
@@ -39,21 +33,21 @@ impl std::fmt::Display for Params {
 }
 
 #[inline]
-fn fib_classic(p: Params) {
-    let _ = fib::<Parallel>(
+fn fib_classic(p: Params) -> (u32, u32) {
+    fib::<Parallel>(
         black_box(FIB_N),
         black_box(p.latency_ms),
         black_box(p.latency_p),
-    );
+    )
 }
 
 #[inline]
-fn fib_lh(p: Params) {
-    let _ = rayon::spawn_blocking_future(fib_latency_hiding(
+fn fib_lh(p: Params) -> (u32, u32) {
+    rayon::spawn_blocking_future(fib_latency_hiding(
         black_box(FIB_N),
         black_box(p.latency_ms),
         black_box(p.latency_p),
-    ));
+    ))
 }
 
 #[inline]
@@ -67,41 +61,15 @@ fn quicksort_classic(p: Params) {
 
 #[inline]
 fn quicksort_lh(p: Params) {
-    let _ = rayon::spawn_blocking_future(quicksort_latency_hiding(
+    rayon::spawn_blocking_future(quicksort_latency_hiding(
         black_box(&mut generate_random_sequence(QSORT_LEN)),
         black_box(p.latency_ms),
         black_box(p.latency_p),
     ));
 }
 
-fn map_reduce_classic(p: Params) {
-    let map = |id: &mut usize| map_classic(id, p.latency_ms, p.latency_p);
-    let reduce = |player_1, player_2| reduce_classic(player_1, player_2, p.latency_ms, p.latency_p);
-    let identity = identity_classic;
-
-    let _ = map_reduce(
-        black_box(&mut generate_random_ids(MAP_REDUCE_LEN)),
-        &map,
-        &reduce,
-        &identity,
-    );
-}
-
-fn map_reduce_lh(p: Params) {
-    let map = map_constrain(|id: &mut usize| map_latency_hiding(id, p.latency_ms, p.latency_p));
-    let reduce =
-        |player_1, player_2| reduce_latency_hiding(player_1, player_2, p.latency_ms, p.latency_p);
-
-    let _ = rayon::spawn_blocking_future(map_reduce_latency_hiding(
-        black_box(&mut generate_random_ids(MAP_REDUCE_LEN)),
-        &map,
-        &reduce,
-        &identity_latency_hiding,
-    ));
-}
-
 fn param_sweep(c: &mut Criterion) {
-    fn run_param_sweep<F1: FnMut(Params), F2: FnMut(Params)>(
+    fn run_param_sweep<F1: FnMut(Params) -> R1, F2: FnMut(Params) -> R2, R1, R2>(
         latency_sweep_group: &mut BenchmarkGroup<WallTime>,
         mut classic: F1,
         mut latency_hiding: F2,
@@ -145,16 +113,6 @@ fn param_sweep(c: &mut Criterion) {
         None,
     );
     quicksort_group.finish();
-
-    // let mut map_reduce_group = c.benchmark_group("MapReduce");
-    // run_param_sweep(
-    //     &mut map_reduce_group,
-    //     map_reduce_classic,
-    //     map_reduce_lh,
-    //     None,
-    //     None,
-    // );
-    // map_reduce_group.finish()
 }
 
 criterion_group! {
