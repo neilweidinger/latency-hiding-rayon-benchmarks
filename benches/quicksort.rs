@@ -4,8 +4,7 @@ use criterion::BatchSize::SmallInput;
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
 const LATENCY_MS: [u64; 5] = [0, 1, 50, 100, 500];
-// const LATENCY_MS: [u64; 1] = [500];
-const LEN: [usize; 1] = [10];
+const LEN: [usize; 4] = [100, 10_000, 1_000_000, 8_000_000]; // any larger than 8 mil runs into stack overflow on macbook
 
 fn inputs() -> Vec<Vec<i32>> {
     LEN.map(|len| generate_random_sequence(len))
