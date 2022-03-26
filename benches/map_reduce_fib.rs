@@ -4,16 +4,28 @@ use benchmarks::{Joiner, Parallel, ParallelLH, Serial};
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use std::iter::Iterator;
 
-const LATENCY_MS: [u64; 5] = [0, 1, 50, 100, 500];
-const LEN: [usize; 3] = [10, 500, 4000];
-const FIB_SETTINGS: [(u32, u32); 2] = [(30, 25), (35, 15)]; // (fib n, serial_cutoff)
+// (fib n, serial_cutoff)
+type FibSettings = (u32, u32);
 
-fn param_string(length: usize, latency_ms: Option<u64>, cores: usize) -> String {
-    if let Some(l) = latency_ms {
-        format!("Length - {} Latency ms - {} Cores - {}", length, l, cores)
-    } else {
-        format!("Length - {} Latency ms - 0 Cores - {}", length, cores)
-    }
+const STACK_SIZE_MB: usize = 16; // set a large stack size to avoid overflow
+const LATENCY_MS: [u64; 5] = [0, 1, 50, 100, 500];
+const LEN: [usize; 3] = [10, 500, 5000];
+const FIB_SETTINGS: [FibSettings; 2] = [(30, 25), (35, 15)];
+
+fn param_string(
+    length: usize,
+    latency_ms: Option<u64>,
+    cores: usize,
+    fib_settings: FibSettings,
+) -> String {
+    format!(
+        "Length - {} Latency ms - {} Cores - {} Fib N - {} Cutoff - {}",
+        length,
+        latency_ms.unwrap_or(0),
+        cores,
+        fib_settings.0,
+        fib_settings.1
+    )
 }
 
 fn map_reduce_fib<J: Joiner>(
@@ -51,7 +63,7 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
             let mut input = vec![fib_n; len];
 
             bench_group.bench_function(
-                BenchmarkId::new("Serial", param_string(len, None, 1)),
+                BenchmarkId::new("Serial", param_string(len, None, 1, (fib_n, serial_cutoff))),
                 |b| {
                     b.iter(|| {
                         map_reduce_fib::<Serial>(
@@ -69,6 +81,7 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
     for cores in num_cores.clone() {
         let pool = rayon::ThreadPoolBuilder::new()
             .num_threads(cores)
+            .stack_size(STACK_SIZE_MB * 1024 * 1024)
             .build()
             .unwrap();
 
@@ -78,7 +91,10 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
 
                 for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(l) }) {
                     bench_group.bench_with_input(
-                        BenchmarkId::new("Classic", param_string(len, latency_ms, cores)),
+                        BenchmarkId::new(
+                            "Classic",
+                            param_string(len, latency_ms, cores, (fib_n, serial_cutoff)),
+                        ),
                         &latency_ms,
                         |b, &l| {
                             pool.install(|| {
@@ -94,7 +110,10 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
                     );
 
                     bench_group.bench_with_input(
-                        BenchmarkId::new("Latency Hiding", param_string(len, latency_ms, cores)),
+                        BenchmarkId::new(
+                            "Latency Hiding",
+                            param_string(len, latency_ms, cores, (fib_n, serial_cutoff)),
+                        ),
                         &latency_ms,
                         |b, &l| {
                             pool.install(|| {

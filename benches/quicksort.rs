@@ -3,8 +3,9 @@ use benchmarks::{Parallel, ParallelLH, Serial};
 use criterion::BatchSize::SmallInput;
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
+const STACK_SIZE_MB: usize = 16; // set a large stack size to avoid overflow
 const LATENCY_MS: [u64; 5] = [0, 1, 50, 100, 500];
-const LEN: [usize; 4] = [100, 10_000, 1_000_000, 8_000_000]; // any larger than 8 mil runs into stack overflow on macbook
+const LEN: [usize; 4] = [100, 10_000, 1_000_000, 10_000_000];
 
 fn inputs() -> Vec<Vec<i32>> {
     LEN.map(|len| generate_random_sequence(len))
@@ -47,6 +48,7 @@ fn quicksort_bench(c: &mut Criterion) {
     for cores in num_cores.clone() {
         let pool = rayon::ThreadPoolBuilder::new()
             .num_threads(cores)
+            .stack_size(STACK_SIZE_MB * 1024 * 1024)
             .build()
             .unwrap();
 
