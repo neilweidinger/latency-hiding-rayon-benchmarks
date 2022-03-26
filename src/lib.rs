@@ -1,4 +1,5 @@
 use async_io::Timer;
+use clap::ArgEnum;
 use pin_utils::pin_mut;
 use rand::prelude::*;
 use std::cell::UnsafeCell;
@@ -13,19 +14,11 @@ thread_local! {
     static RNG: UnsafeCell<ThreadRng> = UnsafeCell::new(rand::thread_rng());
 }
 
+#[derive(Copy, Clone, ArgEnum)]
 pub enum ExecutionMode {
     LatencyHiding,
     Parallel,
     Serial,
-}
-
-pub fn parse_execution_mode(s: &str) -> Result<ExecutionMode, ParseExecutionModeError> {
-    match s {
-        "latency-hiding" | "l" => Ok(ExecutionMode::LatencyHiding),
-        "parallel" | "p" => Ok(ExecutionMode::Parallel),
-        "serial" | "s" => Ok(ExecutionMode::Serial),
-        _ => Err(ParseExecutionModeError::ParseError),
-    }
 }
 
 #[derive(Debug)]
@@ -173,7 +166,7 @@ fn incurs_latency(p: f32) -> bool {
     })
 }
 
-fn incur_latency<J: Joiner>(latency_ms: u64) {
+fn inject_latency<J: Joiner>(latency_ms: u64) {
     if J::is_latency_hiding() {
         let future_job = rayon::FutureJob::new(Timer::after(Duration::from_millis(latency_ms)));
         pin_mut!(future_job);
@@ -184,21 +177,11 @@ fn incur_latency<J: Joiner>(latency_ms: u64) {
 }
 
 /// Used for latency/compute ration adjust benchmarks
-/// if incurs_latency(latency_p) {
-///     if latency_hiding {
-///         spawn_blocking_future // incur latency, latency hiding
-///     }
-///     else {
-///         sleep // incur latency, not latency hiding
-///     }
-/// }
-/// else {
-///     sleep // "compute" instead of incurring latency, e.g. we need to compute some required data
-/// }
-fn incur_latency_or_compute<J: Joiner>(latency_ms: u64, latency_p: f32) {
+fn inject_latency_or_compute<J: Joiner>(latency_ms: u64, latency_p: f32) {
     if incurs_latency(latency_p) {
-        incur_latency::<J>(latency_ms)
+        inject_latency::<J>(latency_ms)
     } else {
+        // otherwise if not injecting latency, spending equivalent time "computing"
         std::thread::sleep(Duration::from_millis(latency_ms));
     }
 }

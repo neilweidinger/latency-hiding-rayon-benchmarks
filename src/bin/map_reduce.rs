@@ -1,10 +1,10 @@
 use benchmarks::map_reduce::{map_reduce, map_reduce_fib};
-use benchmarks::{parse_execution_mode, ExecutionMode, Parallel, ParallelLH, Serial};
+use benchmarks::{ExecutionMode, Parallel, ParallelLH, Serial};
 use clap::Parser;
 
 #[derive(Parser)]
 struct Args {
-    #[clap(short, long, parse(try_from_str = parse_execution_mode))]
+    #[clap(short, long, arg_enum)]
     mode: ExecutionMode,
     #[clap(short, long, default_value = "10")]
     n: usize,

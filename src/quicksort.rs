@@ -1,4 +1,4 @@
-use crate::{incur_latency, Joiner};
+use crate::{inject_latency, Joiner};
 use rand::distributions::Distribution;
 use rand::distributions::Standard;
 
@@ -28,7 +28,8 @@ fn partition<T: Ord>(input: &mut [T]) -> usize {
 pub fn quicksort<J: Joiner, T: Ord + Send>(input: &mut [T], latency_ms: Option<u64>) {
     if input.len() <= SERIAL_CUTOFF {
         if let Some(latency_ms) = latency_ms {
-            incur_latency::<J>(latency_ms); // incur latency, if specified
+            // inject latency, if specified, but only in root nodes of computation DAG
+            inject_latency::<J>(latency_ms);
         }
 
         input.sort_unstable();
