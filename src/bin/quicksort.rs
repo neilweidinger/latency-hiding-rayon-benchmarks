@@ -1,5 +1,7 @@
 use benchmarks::quicksort::{generate_random_sequence, quicksort};
-use benchmarks::{build_global_threadpool, ExecutionMode, Parallel, ParallelLH, Serial};
+use benchmarks::{
+    build_global_threadpool, parse_latency_p, ExecutionMode, Parallel, ParallelLH, Serial, Work,
+};
 use clap::Parser;
 
 #[derive(Parser)]
@@ -10,6 +12,8 @@ struct Args {
     n: usize,
     #[clap(short, long)]
     latency_ms: Option<u64>,
+    #[clap(short = 'p', long, parse(try_from_str = parse_latency_p))]
+    latency_p: Option<f32>,
     /// Defaults to number of cores on machine
     #[clap(short, long)]
     cores: Option<usize>,
@@ -20,6 +24,7 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
+    let work = Work::new(args.latency_ms, args.latency_p);
 
     let mut v = generate_random_sequence(args.n);
     println!("Unsorted: {:?}...{:?}", &v[..3], &v[v.len() - 3..]);
@@ -28,13 +33,13 @@ fn main() {
 
     match args.mode {
         ExecutionMode::LatencyHiding => {
-            quicksort::<ParallelLH, _>(&mut v, args.latency_ms);
+            quicksort::<ParallelLH, _>(&mut v, &work);
         }
         ExecutionMode::Parallel => {
-            quicksort::<Parallel, _>(&mut v, args.latency_ms);
+            quicksort::<Parallel, _>(&mut v, &work);
         }
         ExecutionMode::Serial => {
-            quicksort::<Serial, _>(&mut v, args.latency_ms);
+            quicksort::<Serial, _>(&mut v, &work);
         }
     }
 

@@ -1,5 +1,5 @@
 use benchmarks::quicksort::{generate_random_sequence, quicksort};
-use benchmarks::{Parallel, ParallelLH, Serial};
+use benchmarks::{Parallel, ParallelLH, Serial, Work};
 use criterion::BatchSize::SmallInput;
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
@@ -14,16 +14,17 @@ fn inputs() -> Vec<Vec<i32>> {
 }
 
 fn param_string(length: usize, latency_ms: Option<u64>, cores: usize) -> String {
-    if let Some(l) = latency_ms {
-        format!("Length - {} Latency ms - {} Cores - {}", length, l, cores)
-    } else {
-        format!("Length - {} Latency ms - 0 Cores - {}", length, cores)
-    }
+    format!(
+        "Length - {} | Latency ms - {} | Cores - {}",
+        length,
+        latency_ms.unwrap_or(0),
+        cores
+    )
 }
 
 fn quicksort_bench(c: &mut Criterion) {
     let mut bench_group = c.benchmark_group("Quicksort");
-    let step = if num_cpus::get() <= 10 { 2 } else { 5 };
+    let step = if num_cpus::get() <= 10 { 2 } else { 10 };
     let num_cores = [1]
         .into_iter()
         .chain((step..=num_cpus::get()).step_by(step));
@@ -37,7 +38,7 @@ fn quicksort_bench(c: &mut Criterion) {
             |b, ii| {
                 b.iter_batched_ref(
                     || ii.clone(),
-                    |i| quicksort::<Serial, _>(black_box(i), None), // no need for pool since serial version doesn't hook into Rayon
+                    |i| quicksort::<Serial, _>(black_box(i), &Work::new(None, None)), // no need for pool since serial version doesn't hook into Rayon
                     SmallInput,
                 );
             },
@@ -62,7 +63,10 @@ fn quicksort_bench(c: &mut Criterion) {
                             || ii.clone(),
                             |i| {
                                 pool.install(|| {
-                                    quicksort::<Parallel, _>(black_box(i), black_box(latency_ms))
+                                    quicksort::<Parallel, _>(
+                                        black_box(i),
+                                        black_box(&Work::new(latency_ms, None)),
+                                    )
                                 })
                             },
                             SmallInput,
@@ -81,7 +85,10 @@ fn quicksort_bench(c: &mut Criterion) {
                             || ii.clone(),
                             |i| {
                                 pool.install(|| {
-                                    quicksort::<ParallelLH, _>(black_box(i), black_box(latency_ms))
+                                    quicksort::<ParallelLH, _>(
+                                        black_box(i),
+                                        black_box(&Work::new(latency_ms, None)),
+                                    )
                                 })
                             },
                             SmallInput,

@@ -176,6 +176,44 @@ pub fn parse_latency_p(s: &str) -> Result<f32, ParseLatencyPError> {
     }
 }
 
+#[derive(Copy, Clone)]
+pub enum Work {
+    Nothing,
+    PureLatency { latency_ms: u64 },
+    LatencyOrCompute { latency_ms: u64, latency_p: f32 },
+}
+
+impl Work {
+    pub fn new(latency_ms: Option<u64>, latency_p: Option<f32>) -> Self {
+        match (latency_ms, latency_p) {
+            (None, None) => Work::Nothing,
+            (Some(latency_ms), None) => Work::PureLatency { latency_ms },
+            (Some(latency_ms), Some(latency_p)) => Work::LatencyOrCompute {
+                latency_ms,
+                latency_p,
+            },
+            (None, Some(_)) => panic!("Parse error for Work"),
+        }
+    }
+
+    pub fn do_work<J: Joiner>(&self) {
+        match self {
+            Work::Nothing => {}
+            Work::PureLatency { latency_ms } => {
+                inject_latency::<J>(*latency_ms);
+            }
+            Work::LatencyOrCompute {
+                latency_ms,
+                latency_p,
+            } => {
+                if incurs_latency(*latency_p) {
+                    inject_latency::<J>(*latency_ms)
+                }
+            }
+        }
+    }
+}
+
 /// Returns true if latency is incurred according to given p (probability that latency is incurred)
 #[must_use]
 fn incurs_latency(p: f32) -> bool {
@@ -191,16 +229,6 @@ fn inject_latency<J: Joiner>(latency_ms: u64) {
         pin_mut!(future_job);
         future_job.spawn().await_future_job();
     } else {
-        std::thread::sleep(Duration::from_millis(latency_ms));
-    }
-}
-
-/// Used for latency/compute ration adjust benchmarks
-fn inject_latency_or_compute<J: Joiner>(latency_ms: u64, latency_p: f32) {
-    if incurs_latency(latency_p) {
-        inject_latency::<J>(latency_ms)
-    } else {
-        // otherwise if not injecting latency, spending equivalent time "computing"
         std::thread::sleep(Duration::from_millis(latency_ms));
     }
 }

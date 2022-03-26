@@ -31,15 +31,13 @@ where
 
 pub mod map_reduce_fib {
     use crate::fib::fib;
-    use crate::{inject_latency, Joiner, Parallel};
+    use crate::{Joiner, Parallel, Work};
 
-    pub fn map<J: Joiner>(n: u32, latency_ms: Option<u64>, serial_cutoff: u32) -> u32 {
-        if let Some(latency_ms) = latency_ms {
-            // inject latency, if specified, but only in root nodes of computation DAG
-            inject_latency::<J>(latency_ms);
-        }
+    pub fn map<J: Joiner>(n: u32, work: &Work, serial_cutoff: u32) -> u32 {
+        // possibly do work, if specified, but only in root nodes of computation DAG
+        work.do_work::<J>();
 
-        fib::<Parallel>(n, None, serial_cutoff).0
+        fib::<Parallel>(n, work, serial_cutoff).0
     }
 
     pub fn reduce(f1: u32, f2: u32) -> u32 {

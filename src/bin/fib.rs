@@ -1,5 +1,7 @@
 use benchmarks::fib::{fib, fib_single_future};
-use benchmarks::{build_global_threadpool, ExecutionMode, Parallel, ParallelLH, Serial};
+use benchmarks::{
+    build_global_threadpool, parse_latency_p, ExecutionMode, Parallel, ParallelLH, Serial, Work,
+};
 use clap::Parser;
 use pin_utils::pin_mut;
 
@@ -13,6 +15,8 @@ struct Args {
     n: u32,
     #[clap(short, long)]
     latency_ms: Option<u64>,
+    #[clap(short = 'p', long, parse(try_from_str = parse_latency_p))]
+    latency_p: Option<f32>,
     #[clap(short, long, default_value = "25")]
     serial_cutoff: u32,
     /// Defaults to number of cores on machine
@@ -25,6 +29,7 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
+    let work = Work::new(args.latency_ms, args.latency_p);
 
     build_global_threadpool(args.cores, args.stack_size);
 
@@ -42,11 +47,9 @@ fn main() {
         r.unwrap()
     } else {
         match args.mode {
-            ExecutionMode::LatencyHiding => {
-                fib::<ParallelLH>(args.n, args.latency_ms, args.serial_cutoff)
-            }
-            ExecutionMode::Parallel => fib::<Parallel>(args.n, args.latency_ms, args.serial_cutoff),
-            ExecutionMode::Serial => fib::<Serial>(args.n, args.latency_ms, args.serial_cutoff),
+            ExecutionMode::LatencyHiding => fib::<ParallelLH>(args.n, &work, args.serial_cutoff),
+            ExecutionMode::Parallel => fib::<Parallel>(args.n, &work, args.serial_cutoff),
+            ExecutionMode::Serial => fib::<Serial>(args.n, &work, args.serial_cutoff),
         }
     };
 

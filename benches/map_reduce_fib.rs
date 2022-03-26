@@ -1,6 +1,6 @@
 use benchmarks::map_reduce::map_reduce;
 use benchmarks::map_reduce::map_reduce_fib;
-use benchmarks::{Joiner, Parallel, ParallelLH, Serial};
+use benchmarks::{Joiner, Parallel, ParallelLH, Serial, Work};
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use std::iter::Iterator;
 
@@ -19,7 +19,7 @@ fn param_string(
     fib_settings: FibSettings,
 ) -> String {
     format!(
-        "Length - {} Latency ms - {} Cores - {} Fib N - {} Cutoff - {}",
+        "Length - {} | Latency ms - {} | Cores - {} | Fib N - {} | Cutoff - {}",
         length,
         latency_ms.unwrap_or(0),
         cores,
@@ -40,7 +40,9 @@ fn map_reduce_fib<J: Joiner>(
         f
     }
 
-    let map = constrain(|&mut n| map_reduce_fib::map::<J>(n, latency_ms, serial_cutoff));
+    let map = constrain(|&mut n| {
+        map_reduce_fib::map::<J>(n, &Work::new(latency_ms, None), serial_cutoff)
+    });
 
     map_reduce::<J, _, _, _, _, _>(
         input,
@@ -52,7 +54,7 @@ fn map_reduce_fib<J: Joiner>(
 
 fn map_reduce_fib_bench(c: &mut Criterion) {
     let mut bench_group = c.benchmark_group("MapReduce Fib");
-    let step = if num_cpus::get() <= 10 { 2 } else { 5 };
+    let step = if num_cpus::get() <= 10 { 2 } else { 10 };
     let num_cores = [1]
         .into_iter()
         .chain((step..=num_cpus::get()).step_by(step));

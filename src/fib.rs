@@ -1,27 +1,25 @@
-use crate::{inject_latency, Joiner, Serial};
+use crate::{Joiner, Serial, Work};
 use async_io::Timer;
 use async_recursion::async_recursion;
 use futures::join;
 use std::time::Duration;
 
 #[must_use]
-pub fn fib<J: Joiner>(n: u32, latency_ms: Option<u64>, serial_cutoff: u32) -> (u32, u32) {
+pub fn fib<J: Joiner>(n: u32, work: &Work, serial_cutoff: u32) -> (u32, u32) {
     if n <= 1 {
-        if let Some(latency_ms) = latency_ms {
-            // inject latency, if specified, but only in root nodes of computation DAG
-            inject_latency::<J>(latency_ms);
-        }
+        // possibly do work, if specified, but only in root nodes of computation DAG
+        work.do_work::<J>();
 
         return (n, 1);
     }
 
     if J::is_parallel() && n <= serial_cutoff {
-        return fib::<Serial>(n, latency_ms, serial_cutoff);
+        return fib::<Serial>(n, work, serial_cutoff);
     }
 
     let ((fib1, calls1), (fib2, calls2)) = J::join(
-        || fib::<J>(n - 1, latency_ms, serial_cutoff),
-        || fib::<J>(n - 2, latency_ms, serial_cutoff),
+        || fib::<J>(n - 1, work, serial_cutoff),
+        || fib::<J>(n - 2, work, serial_cutoff),
     );
 
     (fib1 + fib2, calls1 + calls2)
