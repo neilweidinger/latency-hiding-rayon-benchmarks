@@ -54,7 +54,7 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
                 .build()
                 .unwrap();
 
-            for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(1) }) {
+            for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(l) }) {
                 bench_group.bench_with_input(
                     BenchmarkId::new("Classic", param_string(len, latency_ms, cores)),
                     &latency_ms,

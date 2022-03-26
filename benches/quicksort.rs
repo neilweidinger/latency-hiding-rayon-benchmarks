@@ -47,7 +47,7 @@ fn quicksort_bench(c: &mut Criterion) {
                 .build()
                 .unwrap();
 
-            for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(1) }) {
+            for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(l) }) {
                 bench_group.bench_with_input(
                     BenchmarkId::new("Parallel", param_string(input.len(), latency_ms, cores)),
                     &inputs,
