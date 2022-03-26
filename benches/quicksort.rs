@@ -1,21 +1,27 @@
 use benchmarks::quicksort::{generate_random_sequence, quicksort};
-use benchmarks::{Parallel, Serial};
+use benchmarks::{Parallel, ParallelLH, Serial};
 use criterion::BatchSize::SmallInput;
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
+const LATENCY_MS: [u64; 5] = [0, 1, 50, 100, 500];
+const LEN: [usize; 3] = [1_000, 1_000_000, 10_000_000];
+
 fn inputs() -> Vec<Vec<i32>> {
-    [1_000, 1_000_000, 10_000_000]
-        .iter()
-        .map(|&len| generate_random_sequence(len))
+    LEN.map(|len| generate_random_sequence(len))
+        .into_iter()
         .collect()
 }
 
-fn param_string(cores: usize, len: usize) -> String {
-    format!("Cores - {} Len - {}", cores, len)
+fn param_string(length: usize, latency_ms: Option<u64>, cores: usize) -> String {
+    if let Some(l) = latency_ms {
+        format!("Length - {} Latency ms - {} Cores - {}", length, l, cores)
+    } else {
+        format!("Length - {} Latency ms - 0 Cores - {}", length, cores)
+    }
 }
 
 fn quicksort_bench(c: &mut Criterion) {
-    let mut quicksort_group = c.benchmark_group("Quicksort");
+    let mut bench_group = c.benchmark_group("Quicksort");
     let step = if num_cpus::get() <= 10 { 2 } else { 5 };
     let num_cores = [1]
         .into_iter()
@@ -23,37 +29,54 @@ fn quicksort_bench(c: &mut Criterion) {
     let inputs = inputs();
 
     for input in inputs.iter() {
-        // Bench serial version once for each len, no need to loop through cores since serial
-        // version only runs on one core (doesn't hook into Rayon)
-        quicksort_group.bench_function(
-            BenchmarkId::new("Serial", param_string(1, input.len())),
-            |b| {
+        bench_group.bench_with_input(
+            BenchmarkId::new("Serial", param_string(input.len(), None, 1)),
+            &inputs,
+            |b, ii| {
                 b.iter_batched_ref(
-                    || input.clone(),
-                    |i| quicksort::<_, Serial>(black_box(i), 0, 0.0), // no need for pool since serial version doesn't hook into Rayon
+                    || ii.clone(),
+                    |i| quicksort::<Serial, _>(black_box(i), None), // no need for pool since serial version doesn't hook into Rayon
                     SmallInput,
                 );
             },
         );
-    }
 
-    for cores in num_cores.clone() {
-        let pool = rayon::ThreadPoolBuilder::new()
-            .num_threads(cores)
-            .build()
-            .unwrap();
+        for cores in num_cores.clone() {
+            let pool = rayon::ThreadPoolBuilder::new()
+                .num_threads(cores)
+                .build()
+                .unwrap();
 
-        for input in inputs.iter() {
-            quicksort_group.bench_function(
-                BenchmarkId::new("Parallel", param_string(cores, input.len())),
-                |b| {
-                    b.iter_batched_ref(
-                        || input.clone(),
-                        |i| pool.install(|| quicksort::<_, Parallel>(black_box(i), 0, 0.0)),
-                        SmallInput,
+            for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(1) }) {
+                for input in inputs.iter() {
+                    bench_group.bench_with_input(
+                        BenchmarkId::new("Parallel", param_string(input.len(), latency_ms, cores)),
+                        &inputs,
+                        |b, ii| {
+                            b.iter_batched_ref(
+                                || ii.clone(),
+                                |i| pool.install(|| quicksort::<Parallel, _>(black_box(i), None)),
+                                SmallInput,
+                            );
+                        },
                     );
-                },
-            );
+
+                    bench_group.bench_with_input(
+                        BenchmarkId::new(
+                            "Latency Hiding",
+                            param_string(input.len(), latency_ms, cores),
+                        ),
+                        &inputs,
+                        |b, ii| {
+                            b.iter_batched_ref(
+                                || ii.clone(),
+                                |i| pool.install(|| quicksort::<ParallelLH, _>(black_box(i), None)),
+                                SmallInput,
+                            );
+                        },
+                    );
+                }
+            }
         }
     }
 }
