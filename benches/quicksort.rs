@@ -4,7 +4,8 @@ use criterion::BatchSize::SmallInput;
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
 const LATENCY_MS: [u64; 5] = [0, 1, 50, 100, 500];
-const LEN: [usize; 3] = [1_000, 1_000_000, 10_000_000];
+// const LATENCY_MS: [u64; 1] = [500];
+const LEN: [usize; 1] = [10];
 
 fn inputs() -> Vec<Vec<i32>> {
     LEN.map(|len| generate_random_sequence(len))
@@ -26,12 +27,13 @@ fn quicksort_bench(c: &mut Criterion) {
     let num_cores = [1]
         .into_iter()
         .chain((step..=num_cpus::get()).step_by(step));
-    let inputs = inputs();
+    let mut all_inputs = inputs();
 
-    for input in inputs.iter() {
+    // Serial Benchmarks
+    for input in all_inputs.iter_mut() {
         bench_group.bench_with_input(
             BenchmarkId::new("Serial", param_string(input.len(), None, 1)),
-            &inputs,
+            input,
             |b, ii| {
                 b.iter_batched_ref(
                     || ii.clone(),
@@ -40,21 +42,28 @@ fn quicksort_bench(c: &mut Criterion) {
                 );
             },
         );
+    }
 
-        for cores in num_cores.clone() {
-            let pool = rayon::ThreadPoolBuilder::new()
-                .num_threads(cores)
-                .build()
-                .unwrap();
+    // Parallel Benchmarks
+    for cores in num_cores.clone() {
+        let pool = rayon::ThreadPoolBuilder::new()
+            .num_threads(cores)
+            .build()
+            .unwrap();
 
+        for input in all_inputs.iter_mut() {
             for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(l) }) {
                 bench_group.bench_with_input(
-                    BenchmarkId::new("Parallel", param_string(input.len(), latency_ms, cores)),
-                    &inputs,
+                    BenchmarkId::new("Classic", param_string(input.len(), latency_ms, cores)),
+                    input,
                     |b, ii| {
                         b.iter_batched_ref(
                             || ii.clone(),
-                            |i| pool.install(|| quicksort::<Parallel, _>(black_box(i), None)),
+                            |i| {
+                                pool.install(|| {
+                                    quicksort::<Parallel, _>(black_box(i), black_box(latency_ms))
+                                })
+                            },
                             SmallInput,
                         );
                     },
@@ -65,11 +74,15 @@ fn quicksort_bench(c: &mut Criterion) {
                         "Latency Hiding",
                         param_string(input.len(), latency_ms, cores),
                     ),
-                    &inputs,
+                    input,
                     |b, ii| {
                         b.iter_batched_ref(
                             || ii.clone(),
-                            |i| pool.install(|| quicksort::<ParallelLH, _>(black_box(i), None)),
+                            |i| {
+                                pool.install(|| {
+                                    quicksort::<ParallelLH, _>(black_box(i), black_box(latency_ms))
+                                })
+                            },
                             SmallInput,
                         );
                     },

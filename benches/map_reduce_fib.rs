@@ -40,6 +40,7 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
         .into_iter()
         .chain((step..=num_cpus::get()).step_by(step));
 
+    // Serial benchmarks
     for len in LEN {
         let mut input = vec![30; len];
 
@@ -47,12 +48,17 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
             BenchmarkId::new("Serial", param_string(len, None, 1)),
             |b| b.iter(|| map_reduce_fib::<Serial>(black_box(&mut input), black_box(None))),
         );
+    }
 
-        for cores in num_cores.clone() {
-            let pool = rayon::ThreadPoolBuilder::new()
-                .num_threads(cores)
-                .build()
-                .unwrap();
+    // Parallel benchmarks
+    for cores in num_cores.clone() {
+        let pool = rayon::ThreadPoolBuilder::new()
+            .num_threads(cores)
+            .build()
+            .unwrap();
+
+        for len in LEN {
+            let mut input = vec![30; len];
 
             for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(l) }) {
                 bench_group.bench_with_input(

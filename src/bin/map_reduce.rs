@@ -10,12 +10,22 @@ struct Args {
     n: usize,
     #[clap(short, long)]
     latency_ms: Option<u64>,
+    /// Defaults to number of cores on machine
+    #[clap(short, long)]
+    cores: Option<usize>,
 }
 
 fn main() {
     let args = Args::parse();
 
     let mut i = vec![30; args.n];
+
+    if let Some(cores) = args.cores {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(cores)
+            .build_global()
+            .unwrap();
+    }
 
     let r = match args.mode {
         ExecutionMode::LatencyHiding => {

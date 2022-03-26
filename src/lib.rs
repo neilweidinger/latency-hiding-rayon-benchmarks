@@ -183,22 +183,22 @@ fn incur_latency<J: Joiner>(latency_ms: u64) {
     }
 }
 
-// This really should just be used in a synthetic param sweep bench
-// /// if incurs_latency(latency_p) {
-// ///     if latency_hiding {
-// ///         spawn_blocking_future // incur latency, latency hiding
-// ///     }
-// ///     else {
-// ///         sleep // incur latency, not latency hiding
-// ///     }
-// /// }
-// /// else {
-// ///     sleep // "compute" instead of incurring latency, e.g. we need to compute some required data
-// /// }
-// pub fn incur_latency_or_compute(latency_ms: u64, latency_p: f32, latency_hiding: bool) {
-//     if incurs_latency(latency_p) && latency_hiding {
-//         rayon::spawn_blocking_future(Timer::after(Duration::from_millis(latency_ms)));
-//     } else {
-//         std::thread::sleep(Duration::from_millis(latency_ms));
-//     }
-// }
+/// Used for latency/compute ration adjust benchmarks
+/// if incurs_latency(latency_p) {
+///     if latency_hiding {
+///         spawn_blocking_future // incur latency, latency hiding
+///     }
+///     else {
+///         sleep // incur latency, not latency hiding
+///     }
+/// }
+/// else {
+///     sleep // "compute" instead of incurring latency, e.g. we need to compute some required data
+/// }
+fn incur_latency_or_compute<J: Joiner>(latency_ms: u64, latency_p: f32) {
+    if incurs_latency(latency_p) {
+        incur_latency::<J>(latency_ms)
+    } else {
+        std::thread::sleep(Duration::from_millis(latency_ms));
+    }
+}

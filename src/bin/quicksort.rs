@@ -10,6 +10,9 @@ struct Args {
     n: usize,
     #[clap(short, long)]
     latency_ms: Option<u64>,
+    /// Defaults to number of cores on machine
+    #[clap(short, long)]
+    cores: Option<usize>,
 }
 
 fn main() {
@@ -17,6 +20,13 @@ fn main() {
 
     let mut v = generate_random_sequence(args.n);
     println!("Unsorted: {:?}...{:?}", &v[..3], &v[v.len() - 3..]);
+
+    if let Some(cores) = args.cores {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(cores)
+            .build_global()
+            .unwrap();
+    }
 
     match args.mode {
         ExecutionMode::LatencyHiding => {
