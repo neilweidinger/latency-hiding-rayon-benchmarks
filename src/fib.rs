@@ -4,10 +4,8 @@ use async_recursion::async_recursion;
 use futures::join;
 use std::time::Duration;
 
-const DEFAULT_SERIAL_CUTOFF: u32 = 25;
-
 #[must_use]
-pub fn fib<J: Joiner>(n: u32, latency_ms: Option<u64>, serial_cutoff: Option<u32>) -> (u32, u32) {
+pub fn fib<J: Joiner>(n: u32, latency_ms: Option<u64>, serial_cutoff: u32) -> (u32, u32) {
     if n <= 1 {
         if let Some(latency_ms) = latency_ms {
             // inject latency, if specified, but only in root nodes of computation DAG
@@ -17,7 +15,7 @@ pub fn fib<J: Joiner>(n: u32, latency_ms: Option<u64>, serial_cutoff: Option<u32
         return (n, 1);
     }
 
-    if J::is_parallel() && n <= serial_cutoff.unwrap_or(DEFAULT_SERIAL_CUTOFF) {
+    if J::is_parallel() && n <= serial_cutoff {
         return fib::<Serial>(n, latency_ms, serial_cutoff);
     }
 

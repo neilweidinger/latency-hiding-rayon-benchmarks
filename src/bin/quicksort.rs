@@ -1,18 +1,21 @@
 use benchmarks::quicksort::{generate_random_sequence, quicksort};
-use benchmarks::{ExecutionMode, Parallel, ParallelLH, Serial};
+use benchmarks::{build_global_threadpool, ExecutionMode, Parallel, ParallelLH, Serial};
 use clap::Parser;
 
 #[derive(Parser)]
 struct Args {
     #[clap(short, long, arg_enum)]
     mode: ExecutionMode,
-    #[clap(short, long, default_value = "10000000")]
+    #[clap(short, long, default_value = "8000000")]
     n: usize,
     #[clap(short, long)]
     latency_ms: Option<u64>,
     /// Defaults to number of cores on machine
     #[clap(short, long)]
     cores: Option<usize>,
+    /// In multiples of MB. Defaults to Rust stack size default, which is 2MB.
+    #[clap(short, long)]
+    stack_size: Option<usize>,
 }
 
 fn main() {
@@ -21,12 +24,7 @@ fn main() {
     let mut v = generate_random_sequence(args.n);
     println!("Unsorted: {:?}...{:?}", &v[..3], &v[v.len() - 3..]);
 
-    if let Some(cores) = args.cores {
-        rayon::ThreadPoolBuilder::new()
-            .num_threads(cores)
-            .build_global()
-            .unwrap();
-    }
+    build_global_threadpool(args.cores, args.stack_size);
 
     match args.mode {
         ExecutionMode::LatencyHiding => {

@@ -1,5 +1,5 @@
 use benchmarks::fib::{fib, fib_single_future};
-use benchmarks::{ExecutionMode, Parallel, ParallelLH, Serial};
+use benchmarks::{build_global_threadpool, ExecutionMode, Parallel, ParallelLH, Serial};
 use clap::Parser;
 use pin_utils::pin_mut;
 
@@ -13,22 +13,20 @@ struct Args {
     n: u32,
     #[clap(short, long)]
     latency_ms: Option<u64>,
-    #[clap(short, long)]
-    serial_cutoff: Option<u32>,
+    #[clap(short, long, default_value = "25")]
+    serial_cutoff: u32,
     /// Defaults to number of cores on machine
     #[clap(short, long)]
     cores: Option<usize>,
+    /// In multiples of MB. Defaults to Rust stack size default, which is 2MB.
+    #[clap(short, long)]
+    stack_size: Option<usize>,
 }
 
 fn main() {
     let args = Args::parse();
 
-    if let Some(cores) = args.cores {
-        rayon::ThreadPoolBuilder::new()
-            .num_threads(cores)
-            .build_global()
-            .unwrap();
-    }
+    build_global_threadpool(args.cores, args.stack_size);
 
     let (fib, calls) = if args.single_future_mode {
         let mut r: Option<(u32, u32)> = None;

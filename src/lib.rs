@@ -128,6 +128,25 @@ impl Joiner for ParallelLH {
     }
 }
 
+/// Builds Rayon global threadpool. Stack size specified in multiples of MB.
+pub fn build_global_threadpool(cores: Option<usize>, stack_size: Option<usize>) {
+    let pool_builder = rayon::ThreadPoolBuilder::new();
+
+    let pool_builder = if let Some(cores) = cores {
+        pool_builder.num_threads(cores)
+    } else {
+        pool_builder
+    };
+
+    let pool_builder = if let Some(stack_size) = stack_size {
+        pool_builder.stack_size(stack_size * 1024 * 1024) // in multiple of MB
+    } else {
+        pool_builder
+    };
+
+    pool_builder.build_global().unwrap();
+}
+
 #[derive(Debug)]
 pub enum ParseLatencyPError {
     OutOfBounds,
