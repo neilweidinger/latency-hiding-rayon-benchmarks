@@ -48,34 +48,32 @@ fn quicksort_bench(c: &mut Criterion) {
                 .unwrap();
 
             for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(1) }) {
-                for input in inputs.iter() {
-                    bench_group.bench_with_input(
-                        BenchmarkId::new("Parallel", param_string(input.len(), latency_ms, cores)),
-                        &inputs,
-                        |b, ii| {
-                            b.iter_batched_ref(
-                                || ii.clone(),
-                                |i| pool.install(|| quicksort::<Parallel, _>(black_box(i), None)),
-                                SmallInput,
-                            );
-                        },
-                    );
+                bench_group.bench_with_input(
+                    BenchmarkId::new("Parallel", param_string(input.len(), latency_ms, cores)),
+                    &inputs,
+                    |b, ii| {
+                        b.iter_batched_ref(
+                            || ii.clone(),
+                            |i| pool.install(|| quicksort::<Parallel, _>(black_box(i), None)),
+                            SmallInput,
+                        );
+                    },
+                );
 
-                    bench_group.bench_with_input(
-                        BenchmarkId::new(
-                            "Latency Hiding",
-                            param_string(input.len(), latency_ms, cores),
-                        ),
-                        &inputs,
-                        |b, ii| {
-                            b.iter_batched_ref(
-                                || ii.clone(),
-                                |i| pool.install(|| quicksort::<ParallelLH, _>(black_box(i), None)),
-                                SmallInput,
-                            );
-                        },
-                    );
-                }
+                bench_group.bench_with_input(
+                    BenchmarkId::new(
+                        "Latency Hiding",
+                        param_string(input.len(), latency_ms, cores),
+                    ),
+                    &inputs,
+                    |b, ii| {
+                        b.iter_batched_ref(
+                            || ii.clone(),
+                            |i| pool.install(|| quicksort::<ParallelLH, _>(black_box(i), None)),
+                            SmallInput,
+                        );
+                    },
+                );
             }
         }
     }
