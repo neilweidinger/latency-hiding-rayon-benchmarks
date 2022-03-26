@@ -22,7 +22,7 @@ struct Args {
     #[clap(short, long)]
     cores: Option<usize>,
     /// In multiples of MB. Defaults to Rust stack size default, which is 2MB.
-    #[clap(short, long)]
+    #[clap(long)]
     stack_size: Option<usize>,
 }
 
