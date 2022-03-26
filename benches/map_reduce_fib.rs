@@ -54,10 +54,15 @@ fn map_reduce_fib<J: Joiner>(
 
 fn map_reduce_fib_bench(c: &mut Criterion) {
     let mut bench_group = c.benchmark_group("MapReduce Fib");
-    let step = if num_cpus::get() <= 10 { 2 } else { 10 };
-    let num_cores = [1]
-        .into_iter()
-        .chain((step..=num_cpus::get()).step_by(step));
+
+    let num_cores = {
+        let step = if num_cpus::get() <= 10 { 2 } else { 10 };
+        let num_cores = [1]
+            .into_iter()
+            .chain((step..=num_cpus::get()).step_by(step));
+        let cores_2p = [num_cores.clone().last().unwrap()];
+        num_cores.chain(cores_2p)
+    };
 
     // Serial benchmarks
     for len in LEN {

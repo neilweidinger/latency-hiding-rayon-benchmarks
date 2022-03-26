@@ -192,7 +192,9 @@ impl Work {
                 latency_ms,
                 latency_p,
             },
-            (None, Some(_)) => panic!("Parse error for Work"),
+            (None, Some(_)) => {
+                panic!("Parse error for Work: latency_p provided without corresponding latency_ms")
+            }
         }
     }
 
@@ -208,6 +210,9 @@ impl Work {
             } => {
                 if incurs_latency(*latency_p) {
                     inject_latency::<J>(*latency_ms)
+                } else {
+                    // Pretend to "compute"
+                    std::thread::sleep(Duration::from_millis(*latency_ms));
                 }
             }
         }

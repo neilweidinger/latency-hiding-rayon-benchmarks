@@ -9,7 +9,7 @@ use pin_utils::pin_mut;
 struct Args {
     #[clap(short, long, arg_enum)]
     mode: ExecutionMode,
-    #[clap(short, long)]
+    #[clap(long)]
     single_future_mode: bool,
     #[clap(short, long, default_value = "12")]
     n: u32,
@@ -17,7 +17,7 @@ struct Args {
     latency_ms: Option<u64>,
     #[clap(short = 'p', long, parse(try_from_str = parse_latency_p))]
     latency_p: Option<f32>,
-    #[clap(short, long, default_value = "25")]
+    #[clap(long, default_value = "25")]
     serial_cutoff: u32,
     /// Defaults to number of cores on machine
     #[clap(short, long)]

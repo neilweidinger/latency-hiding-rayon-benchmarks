@@ -24,11 +24,16 @@ fn param_string(length: usize, latency_ms: Option<u64>, cores: usize) -> String 
 
 fn quicksort_bench(c: &mut Criterion) {
     let mut bench_group = c.benchmark_group("Quicksort");
-    let step = if num_cpus::get() <= 10 { 2 } else { 10 };
-    let num_cores = [1]
-        .into_iter()
-        .chain((step..=num_cpus::get()).step_by(step));
     let mut all_inputs = inputs();
+
+    let num_cores = {
+        let step = if num_cpus::get() <= 10 { 2 } else { 10 };
+        let num_cores = [1]
+            .into_iter()
+            .chain((step..=num_cpus::get()).step_by(step));
+        let cores_2p = [num_cores.clone().last().unwrap()];
+        num_cores.chain(cores_2p)
+    };
 
     // Serial Benchmarks
     for input in all_inputs.iter_mut() {
