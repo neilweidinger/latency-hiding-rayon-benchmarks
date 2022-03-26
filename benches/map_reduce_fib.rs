@@ -7,11 +7,11 @@ use std::iter::Iterator;
 const LATENCY_MS: [u64; 5] = [0, 1, 50, 100, 500];
 const LEN: [usize; 3] = [10, 500, 4000];
 
-fn param_string(latency_ms: Option<u64>, cores: usize) -> String {
+fn param_string(length: usize, latency_ms: Option<u64>, cores: usize) -> String {
     if let Some(l) = latency_ms {
-        format!("Latency ms - {} Cores - {}", l, cores)
+        format!("Length - {} Latency ms - {} Cores - {}", length, l, cores)
     } else {
-        format!("Latency ms - 0 Cores - {}", cores)
+        format!("Length - {} Latency ms - 0 Cores - {}", length, cores)
     }
 }
 
@@ -43,9 +43,10 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
     for len in LEN {
         let mut input = vec![30; len];
 
-        bench_group.bench_function(BenchmarkId::new("Serial", param_string(None, 1)), |b| {
-            b.iter(|| map_reduce_fib::<Serial>(black_box(&mut input), black_box(None)))
-        });
+        bench_group.bench_function(
+            BenchmarkId::new("Serial", param_string(len, None, 1)),
+            |b| b.iter(|| map_reduce_fib::<Serial>(black_box(&mut input), black_box(None))),
+        );
 
         for cores in num_cores.clone() {
             let pool = rayon::ThreadPoolBuilder::new()
@@ -55,7 +56,7 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
 
             for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(1) }) {
                 bench_group.bench_with_input(
-                    BenchmarkId::new("Classic", param_string(latency_ms, cores)),
+                    BenchmarkId::new("Classic", param_string(len, latency_ms, cores)),
                     &latency_ms,
                     |b, &l| {
                         pool.install(|| {
@@ -67,7 +68,7 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
                 );
 
                 bench_group.bench_with_input(
-                    BenchmarkId::new("Latency Hiding", param_string(latency_ms, cores)),
+                    BenchmarkId::new("Latency Hiding", param_string(len, latency_ms, cores)),
                     &latency_ms,
                     |b, &l| {
                         pool.install(|| {
