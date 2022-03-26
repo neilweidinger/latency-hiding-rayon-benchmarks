@@ -10,11 +10,11 @@ fn inputs() -> Vec<Vec<i32>> {
         .collect()
 }
 
-fn quicksort_bench(c: &mut Criterion) {
-    fn param_string(cores: usize, len: usize) -> String {
-        format!("Cores - {} Len - {}", cores, len)
-    }
+fn param_string(cores: usize, len: usize) -> String {
+    format!("Cores - {} Len - {}", cores, len)
+}
 
+fn quicksort_bench(c: &mut Criterion) {
     let mut quicksort_group = c.benchmark_group("Quicksort");
     let step = if num_cpus::get() <= 10 { 2 } else { 5 };
     let num_cores = [1]
