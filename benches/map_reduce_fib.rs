@@ -5,6 +5,7 @@ use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criteri
 use std::iter::Iterator;
 
 const LATENCY_MS: [u64; 5] = [0, 1, 50, 100, 500];
+const LEN: [usize; 3] = [10, 500, 4000];
 
 fn param_string(latency_ms: Option<u64>, cores: usize) -> String {
     if let Some(l) = latency_ms {
@@ -14,7 +15,7 @@ fn param_string(latency_ms: Option<u64>, cores: usize) -> String {
     }
 }
 
-fn map_reduce_fib<J: Joiner>(latency_ms: Option<u64>) -> u32 {
+fn map_reduce_fib<J: Joiner>(input: &mut [u32], latency_ms: Option<u64>) -> u32 {
     fn constrain<F>(f: F) -> F
     where
         F: for<'a> Fn(&'a mut u32) -> u32,
@@ -23,10 +24,9 @@ fn map_reduce_fib<J: Joiner>(latency_ms: Option<u64>) -> u32 {
     }
 
     let map = constrain(|&mut n| map_reduce_fib::map::<J>(n, latency_ms));
-    let mut fib_n = [30; 5];
 
     map_reduce::<J, _, _, _, _, _>(
-        &mut fib_n,
+        input,
         &map,
         &map_reduce_fib::reduce,
         &map_reduce_fib::identity,
@@ -34,34 +34,50 @@ fn map_reduce_fib<J: Joiner>(latency_ms: Option<u64>) -> u32 {
 }
 
 fn map_reduce_fib_bench(c: &mut Criterion) {
-    let mut bench_group = c.benchmark_group("MapReduce Fib Parallel");
+    let mut bench_group = c.benchmark_group("MapReduce Fib");
     let step = if num_cpus::get() <= 10 { 2 } else { 5 };
     let num_cores = [1]
         .into_iter()
         .chain((step..=num_cpus::get()).step_by(step));
 
-    bench_group.bench_function(BenchmarkId::new("Serial", param_string(None, 1)), |b| {
-        b.iter(|| map_reduce_fib::<Serial>(black_box(None)))
-    });
+    for len in LEN {
+        let mut input = vec![30; len];
 
-    for cores in num_cores {
-        let pool = rayon::ThreadPoolBuilder::new()
-            .num_threads(cores)
-            .build()
-            .unwrap();
+        bench_group.bench_function(BenchmarkId::new("Serial", param_string(None, 1)), |b| {
+            b.iter(|| map_reduce_fib::<Serial>(black_box(&mut input), black_box(None)))
+        });
 
-        for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(1) }) {
-            bench_group.bench_with_input(
-                BenchmarkId::new("Classic", param_string(latency_ms, cores)),
-                &latency_ms,
-                |b, &l| pool.install(|| b.iter(|| map_reduce_fib::<Parallel>(black_box(l)))),
-            );
+        for cores in num_cores.clone() {
+            let pool = rayon::ThreadPoolBuilder::new()
+                .num_threads(cores)
+                .build()
+                .unwrap();
 
-            bench_group.bench_with_input(
-                BenchmarkId::new("Latency Hiding", param_string(latency_ms, cores)),
-                &latency_ms,
-                |b, &l| pool.install(|| b.iter(|| map_reduce_fib::<ParallelLH>(black_box(l)))),
-            );
+            for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(1) }) {
+                bench_group.bench_with_input(
+                    BenchmarkId::new("Classic", param_string(latency_ms, cores)),
+                    &latency_ms,
+                    |b, &l| {
+                        pool.install(|| {
+                            b.iter(|| {
+                                map_reduce_fib::<Parallel>(black_box(&mut input), black_box(l))
+                            })
+                        })
+                    },
+                );
+
+                bench_group.bench_with_input(
+                    BenchmarkId::new("Latency Hiding", param_string(latency_ms, cores)),
+                    &latency_ms,
+                    |b, &l| {
+                        pool.install(|| {
+                            b.iter(|| {
+                                map_reduce_fib::<ParallelLH>(black_box(&mut input), black_box(l))
+                            })
+                        })
+                    },
+                );
+            }
         }
     }
 
