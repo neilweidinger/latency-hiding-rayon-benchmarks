@@ -8,7 +8,7 @@ use std::iter::Iterator;
 type FibSettings = (u32, u32);
 
 const STACK_SIZE_MB: usize = 16; // set a large stack size to avoid overflow
-const LATENCY_MS: [u64; 4] = [0, 1, 50, 100];
+const LATENCY_MS: [Option<u64>; 4] = [None, Some(1), Some(50), Some(100)];
 const LEN: [usize; 1] = [5000];
 const FIB_SETTINGS: [FibSettings; 2] = [(30, 25), (35, 15)];
 
@@ -60,43 +60,42 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
         let num_cores = [1]
             .into_iter()
             .chain((step..=num_cpus::get()).step_by(step));
-        let cores_2p = [num_cores.clone().last().unwrap()];
+        let cores_2p = [2 * num_cores.clone().last().unwrap()];
         num_cores.chain(cores_2p)
     };
 
-    // Serial benchmarks
     for len in LEN {
         for (fib_n, serial_cutoff) in FIB_SETTINGS {
             let mut input = vec![fib_n; len];
 
-            bench_group.bench_function(
-                BenchmarkId::new("Serial", param_string(len, None, 1, (fib_n, serial_cutoff))),
-                |b| {
-                    b.iter(|| {
-                        map_reduce_fib::<Serial>(
-                            black_box(&mut input),
-                            black_box(None),
-                            black_box(serial_cutoff),
-                        )
-                    })
-                },
-            );
-        }
-    }
+            for latency_ms in LATENCY_MS {
+                // Serial benchmark
+                bench_group.bench_with_input(
+                    BenchmarkId::new(
+                        "Serial",
+                        param_string(len, latency_ms, 1, (fib_n, serial_cutoff)),
+                    ),
+                    &latency_ms,
+                    |b, &l| {
+                        b.iter(|| {
+                            map_reduce_fib::<Serial>(
+                                black_box(&mut input),
+                                black_box(l),
+                                black_box(serial_cutoff),
+                            )
+                        })
+                    },
+                );
 
-    // Parallel benchmarks
-    for cores in num_cores.clone() {
-        let pool = rayon::ThreadPoolBuilder::new()
-            .num_threads(cores)
-            .stack_size(STACK_SIZE_MB * 1024 * 1024)
-            .build()
-            .unwrap();
+                // Parallel benchmarks
+                // Setting up and tearing down threadpool in inner loop, but whatever
+                for cores in num_cores.clone() {
+                    let pool = rayon::ThreadPoolBuilder::new()
+                        .num_threads(cores)
+                        .stack_size(STACK_SIZE_MB * 1024 * 1024)
+                        .build()
+                        .unwrap();
 
-        for len in LEN {
-            for (fib_n, serial_cutoff) in FIB_SETTINGS {
-                let mut input = vec![fib_n; len];
-
-                for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(l) }) {
                     bench_group.bench_with_input(
                         BenchmarkId::new(
                             "Classic",

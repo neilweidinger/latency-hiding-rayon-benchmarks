@@ -178,20 +178,17 @@ pub fn parse_latency_p(s: &str) -> Result<f32, ParseLatencyPError> {
 
 #[derive(Copy, Clone)]
 pub enum Work {
-    Nothing,
-    PureLatency { latency_ms: u64 },
-    LatencyOrCompute { latency_ms: u64, latency_p: f32 },
+    DoNothing,
+    PureLatency { work_ms: u64 },
+    LatencyOrCompute { work_ms: u64, latency_p: f32 },
 }
 
 impl Work {
-    pub fn new(latency_ms: Option<u64>, latency_p: Option<f32>) -> Self {
-        match (latency_ms, latency_p) {
-            (None, None) => Work::Nothing,
-            (Some(latency_ms), None) => Work::PureLatency { latency_ms },
-            (Some(latency_ms), Some(latency_p)) => Work::LatencyOrCompute {
-                latency_ms,
-                latency_p,
-            },
+    pub fn new(work_ms: Option<u64>, latency_p: Option<f32>) -> Self {
+        match (work_ms, latency_p) {
+            (None, None) => Work::DoNothing,
+            (Some(work_ms), None) => Work::PureLatency { work_ms },
+            (Some(work_ms), Some(latency_p)) => Work::LatencyOrCompute { work_ms, latency_p },
             (None, Some(_)) => {
                 panic!("Parse error for Work: latency_p provided without corresponding latency_ms")
             }
@@ -200,19 +197,16 @@ impl Work {
 
     pub fn do_work<J: Joiner>(&self) {
         match self {
-            Work::Nothing => {}
-            Work::PureLatency { latency_ms } => {
-                inject_latency::<J>(*latency_ms);
+            Work::DoNothing => {}
+            Work::PureLatency { work_ms } => {
+                inject_latency::<J>(*work_ms);
             }
-            Work::LatencyOrCompute {
-                latency_ms,
-                latency_p,
-            } => {
+            Work::LatencyOrCompute { work_ms, latency_p } => {
                 if incurs_latency(*latency_p) {
-                    inject_latency::<J>(*latency_ms)
+                    inject_latency::<J>(*work_ms)
                 } else {
                     // Pretend to "compute"
-                    std::thread::sleep(Duration::from_millis(*latency_ms));
+                    std::thread::sleep(Duration::from_millis(*work_ms));
                 }
             }
         }

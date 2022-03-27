@@ -4,7 +4,7 @@ use criterion::BatchSize::SmallInput;
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
 const STACK_SIZE_MB: usize = 16; // set a large stack size to avoid overflow
-const LATENCY_MS: [u64; 4] = [0, 1, 50, 100];
+const LATENCY_MS: [Option<u64>; 4] = [None, Some(1), Some(50), Some(100)];
 const LEN: [usize; 1] = [1_000_000];
 
 fn inputs() -> Vec<Vec<i32>> {
@@ -31,35 +31,34 @@ fn quicksort_bench(c: &mut Criterion) {
         let num_cores = [1]
             .into_iter()
             .chain((step..=num_cpus::get()).step_by(step));
-        let cores_2p = [num_cores.clone().last().unwrap()];
+        let cores_2p = [2 * num_cores.clone().last().unwrap()];
         num_cores.chain(cores_2p)
     };
 
-    // Serial Benchmarks
     for input in all_inputs.iter_mut() {
-        bench_group.bench_with_input(
-            BenchmarkId::new("Serial", param_string(input.len(), None, 1)),
-            input,
-            |b, ii| {
-                b.iter_batched_ref(
-                    || ii.clone(),
-                    |i| quicksort::<Serial, _>(black_box(i), &Work::new(None, None)), // no need for pool since serial version doesn't hook into Rayon
-                    SmallInput,
-                );
-            },
-        );
-    }
+        for latency_ms in LATENCY_MS {
+            // Serial benchmark
+            bench_group.bench_with_input(
+                BenchmarkId::new("Serial", param_string(input.len(), latency_ms, 1)),
+                input,
+                |b, ii| {
+                    b.iter_batched_ref(
+                        || ii.clone(),
+                        |i| quicksort::<Serial, _>(black_box(i), &Work::new(latency_ms, None)),
+                        SmallInput,
+                    );
+                },
+            );
 
-    // Parallel Benchmarks
-    for cores in num_cores.clone() {
-        let pool = rayon::ThreadPoolBuilder::new()
-            .num_threads(cores)
-            .stack_size(STACK_SIZE_MB * 1024 * 1024)
-            .build()
-            .unwrap();
+            // Parallel Benchmarks
+            // Setting up and tearing down threadpool in inner loop, but whatever
+            for cores in num_cores.clone() {
+                let pool = rayon::ThreadPoolBuilder::new()
+                    .num_threads(cores)
+                    .stack_size(STACK_SIZE_MB * 1024 * 1024)
+                    .build()
+                    .unwrap();
 
-        for input in all_inputs.iter_mut() {
-            for latency_ms in LATENCY_MS.map(|l| if l == 0 { None } else { Some(l) }) {
                 bench_group.bench_with_input(
                     BenchmarkId::new("Classic", param_string(input.len(), latency_ms, cores)),
                     input,
