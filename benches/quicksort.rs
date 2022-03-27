@@ -5,7 +5,7 @@ use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criteri
 
 const STACK_SIZE_MB: usize = 16; // set a large stack size to avoid overflow
 const LATENCY_MS: [u64; 4] = [0, 1, 50, 100];
-const LEN: [usize; 2] = [100, 1_000_000];
+const LEN: [usize; 1] = [1_000_000];
 
 fn inputs() -> Vec<Vec<i32>> {
     LEN.map(|len| generate_random_sequence(len))
