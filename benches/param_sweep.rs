@@ -6,7 +6,7 @@ const FIB_N: u32 = 14;
 const FIB_SERIAL_CUTOFF: u32 = 0; // needs to be 0 so we fully split our computational DAG all the way
 
 const STACK_SIZE_MB: usize = 16; // set a large stack size to avoid overflow
-const LATENCY_MS: [u64; 5] = [0, 1, 50, 100, 500];
+const LATENCY_MS: [u64; 4] = [0, 1, 50, 100];
 const LATENCY_P: [f32; 5] = [0.0, 0.25, 0.5, 0.75, 1.0];
 
 #[derive(Copy, Clone)]

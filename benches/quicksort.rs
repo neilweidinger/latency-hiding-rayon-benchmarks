@@ -4,8 +4,7 @@ use criterion::BatchSize::SmallInput;
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
 const STACK_SIZE_MB: usize = 16; // set a large stack size to avoid overflow
-const LATENCY_MS: [u64; 5] = [0, 1, 50, 100, 500];
-// const LEN: [usize; 4] = [100, 10_000, 1_000_000, 10_000_000];
+const LATENCY_MS: [u64; 4] = [0, 1, 50, 100];
 const LEN: [usize; 3] = [100, 10_000, 1_000_000];
 
 fn inputs() -> Vec<Vec<i32>> {

@@ -8,8 +8,8 @@ use std::iter::Iterator;
 type FibSettings = (u32, u32);
 
 const STACK_SIZE_MB: usize = 16; // set a large stack size to avoid overflow
-const LATENCY_MS: [u64; 5] = [0, 1, 50, 100, 500];
-const LEN: [usize; 3] = [10, 500, 5000];
+const LATENCY_MS: [u64; 4] = [0, 1, 50, 100];
+const LEN: [usize; 3] = [10, 100, 5000];
 const FIB_SETTINGS: [FibSettings; 2] = [(30, 25), (35, 15)];
 
 fn param_string(
