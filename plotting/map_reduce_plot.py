@@ -47,8 +47,6 @@ print(df, end='\n---------------\n')
 
 latencies = df.loc[(df['Latency ms'] != 0), 'Latency ms'].unique() # for each latency graph, don't include 0 ms
 
-sns.set_theme(style="darkgrid")
-
 for latency in latencies:
     latency_view = df.loc[((df['Latency ms'] == latency) | (df['Scheduler'] == 'Ideal'))]
 
@@ -69,13 +67,15 @@ for latency in latencies:
     classic = speedups.loc[speedups['Scheduler'] == 'Classic', ['Cores', 'Speedup']].sort_values(by=['Cores'])
     lh = speedups.loc[speedups['Scheduler'] == 'Latency Hiding', ['Cores', 'Speedup']].sort_values(by=['Cores'])
 
-    with sns.axes_style(style="darkgrid"):
+    with sns.axes_style(style="ticks"):
         plt.plot(ideal['Cores'], ideal['Speedup'], marker='o', label='Ideal')
         plt.plot(classic['Cores'], classic['Speedup'], marker='^', label='Classic')
         plt.plot(lh['Cores'], lh['Speedup'], marker='D', label='Latency Hiding')
 
-        plt.title(f'Latency: {latency}')
+        plt.title(f'MapReduceFib with Latency: {latency}')
         plt.legend(loc='best')
-        plt.xlabel('Cores')
-        plt.ylabel('Speedup')
-        plt.show()
+        plt.xlabel('Logical Cores')
+        plt.ylabel(r'Speedup $T_1 / T_P$')
+        sns.despine()
+        plt.savefig(f'plotting/plots/map_reduce_plot_latency_{latency}.png', dpi=200)
+        plt.clf() # plt.show()

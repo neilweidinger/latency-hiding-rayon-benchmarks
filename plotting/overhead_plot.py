@@ -42,8 +42,6 @@ df = pd.DataFrame(data)
 
 print(df, end='\n---------------\n')
 
-sns.set_theme(style="darkgrid")
-
 serial_baseline = df.loc[(df['Scheduler'] == 'Serial'), 'Wallclock']
 assert serial_baseline.size == 1
 serial_baseline = serial_baseline.iloc[0]
@@ -54,12 +52,14 @@ speedups['Speedup'] = speedups['Wallclock'].map(lambda x: serial_baseline / x)
 classic = speedups.loc[speedups['Scheduler'] == 'Classic', ['Cores', 'Speedup']].sort_values(by=['Cores'])
 lh = speedups.loc[speedups['Scheduler'] == 'Latency Hiding', ['Cores', 'Speedup']].sort_values(by=['Cores'])
 
-with sns.axes_style(style="darkgrid"):
+with sns.axes_style(style="ticks"):
     plt.plot(classic['Cores'], classic['Speedup'], marker='^', label='Classic')
     plt.plot(lh['Cores'], lh['Speedup'], marker='D', label='Latency Hiding')
 
     plt.title(f'Overhead')
     plt.legend(loc='best')
-    plt.xlabel('Cores')
-    plt.ylabel('Speedup')
-    plt.show()
+    plt.xlabel('Logical Cores')
+    plt.ylabel(r'Speedup $T_1 / T_P$')
+    sns.despine()
+    plt.savefig('plotting/plots/overhead.png', dpi=200)
+    plt.clf() # plt.show()
