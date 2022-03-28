@@ -34,31 +34,35 @@ fn param_sweep(c: &mut Criterion) {
         .build_global()
         .unwrap();
 
-    for latency_p in LATENCY_P {
-        for work_ms in WORK_MS {
+    for work_ms in WORK_MS {
+        // hardcode Serial and Parallel to always do pure compute, as they don't support the
+        // notion of hiding latency anyway
+        let params = Params(Work::new(work_ms, Some(0.0)));
+
+        // Serial benchmark
+        bench_group.bench_with_input(BenchmarkId::new("Serial", params), &params, |b, p| {
+            b.iter(|| {
+                fib::<Serial>(
+                    black_box(FIB_N),
+                    black_box(&p.0),
+                    black_box(FIB_SERIAL_CUTOFF),
+                )
+            })
+        });
+
+        // Parallel benchmarks
+        bench_group.bench_with_input(BenchmarkId::new("Classic", params), &params, |b, p| {
+            b.iter(|| {
+                fib::<Parallel>(
+                    black_box(FIB_N),
+                    black_box(&p.0),
+                    black_box(FIB_SERIAL_CUTOFF),
+                )
+            })
+        });
+
+        for latency_p in LATENCY_P {
             let params = Params(Work::new(work_ms, Some(latency_p)));
-
-            // Serial benchmark
-            bench_group.bench_with_input(BenchmarkId::new("Serial", params), &params, |b, p| {
-                b.iter(|| {
-                    fib::<Serial>(
-                        black_box(FIB_N),
-                        black_box(&p.0),
-                        black_box(FIB_SERIAL_CUTOFF),
-                    )
-                })
-            });
-
-            // Parallel benchmarks
-            bench_group.bench_with_input(BenchmarkId::new("Classic", params), &params, |b, p| {
-                b.iter(|| {
-                    fib::<Parallel>(
-                        black_box(FIB_N),
-                        black_box(&p.0),
-                        black_box(FIB_SERIAL_CUTOFF),
-                    )
-                })
-            });
 
             bench_group.bench_with_input(
                 BenchmarkId::new("Latency Hiding", params),
