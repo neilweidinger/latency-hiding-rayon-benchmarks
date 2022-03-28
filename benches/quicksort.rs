@@ -15,7 +15,7 @@ fn inputs() -> Vec<Vec<i32>> {
 
 fn param_string(length: usize, latency_ms: Option<u64>, cores: usize) -> String {
     format!(
-        "Length - {} | Latency ms - {} | Cores - {}",
+        "Length: {} | Latency ms: {} | Cores: {}",
         length,
         latency_ms.unwrap_or(0),
         cores

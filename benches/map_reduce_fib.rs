@@ -19,7 +19,7 @@ fn param_string(
     fib_settings: FibSettings,
 ) -> String {
     format!(
-        "Length - {} | Latency ms - {} | Cores - {} | Fib N - {} | Cutoff - {}",
+        "Length: {} | Latency ms: {} | Cores: {} | Fib N: {} | Cutoff: {}",
         length,
         latency_ms.unwrap_or(0),
         cores,

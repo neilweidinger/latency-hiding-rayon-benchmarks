@@ -6,7 +6,7 @@ const FIB_N: u32 = 14;
 const FIB_SERIAL_CUTOFF: u32 = 0; // needs to be 0 so we fully split our computational DAG all the way
 
 const STACK_SIZE_MB: usize = 16; // set a large stack size to avoid overflow
-const WORK_MS: [Option<u64>; 3] = [Some(1), Some(50), Some(100)]; // no need for 0 latency/compute time, since we always want to do at least some amount of work
+const WORK_MS: [Option<u64>; 5] = [Some(1), Some(25), Some(50), Some(100), Some(200)]; // no need for 0 latency/compute time, since we always want to do at least some amount of work
 const LATENCY_P: [f32; 5] = [0.0, 0.25, 0.5, 0.75, 1.0];
 
 #[derive(Copy, Clone)]
