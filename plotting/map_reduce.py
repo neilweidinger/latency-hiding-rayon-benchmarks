@@ -72,10 +72,10 @@ for latency in latencies:
     classic = speedups.loc[speedups['Scheduler'] == 'Classic', ['Cores', 'Speedup']].sort_values(by=['Cores'])
     lh = speedups.loc[speedups['Scheduler'] == 'Latency Hiding', ['Cores', 'Speedup']].sort_values(by=['Cores'])
 
-    with sns.axes_style(style="ticks"):
+    with sns.axes_style(style="whitegrid"):
+        plt.plot(classic['Cores'], classic['Speedup'], marker='D', label='Classic')
+        plt.plot(lh['Cores'], lh['Speedup'], marker='^', label='Latency Hiding')
         plt.plot(ideal['Cores'], ideal['Speedup'], marker='o', label='Ideal')
-        plt.plot(classic['Cores'], classic['Speedup'], marker='^', label='Classic')
-        plt.plot(lh['Cores'], lh['Speedup'], marker='D', label='Latency Hiding')
 
         plt.title(f'MapReduceFib with Latency: {latency}')
         plt.legend(loc='best')

@@ -58,9 +58,9 @@ speedups['Speedup'] = serial_baseline / speedups['Wallclock']
 classic = speedups.loc[speedups['Scheduler'] == 'Classic', ['Cores', 'Speedup']].sort_values(by=['Cores'])
 lh = speedups.loc[speedups['Scheduler'] == 'Latency Hiding', ['Cores', 'Speedup']].sort_values(by=['Cores'])
 
-with sns.axes_style(style="ticks"):
-    plt.plot(classic['Cores'], classic['Speedup'], marker='^', label='Classic')
-    plt.plot(lh['Cores'], lh['Speedup'], marker='D', label='Latency Hiding')
+with sns.axes_style(style="whitegrid"):
+    plt.plot(classic['Cores'], classic['Speedup'], marker='D', label='Classic')
+    plt.plot(lh['Cores'], lh['Speedup'], marker='^', label='Latency Hiding')
 
     plt.title(f'Overhead')
     plt.legend(loc='best')

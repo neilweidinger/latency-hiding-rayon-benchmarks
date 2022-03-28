@@ -3,9 +3,9 @@ use benchmarks::{Parallel, ParallelLH, Serial, Work};
 use criterion::BatchSize::SmallInput;
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
-const STACK_SIZE_MB: usize = 16; // set a large stack size to avoid overflow
+const STACK_SIZE_MB: usize = 24; // set a large stack size to avoid overflow
 const LATENCY_MS: [Option<u64>; 4] = [None, Some(1), Some(50), Some(100)];
-const LEN: [usize; 1] = [1_000_000];
+const LEN: [usize; 1] = [10_000_000];
 
 fn inputs() -> Vec<Vec<i32>> {
     LEN.map(|len| generate_random_sequence(len))
@@ -28,11 +28,8 @@ fn quicksort_bench(c: &mut Criterion) {
 
     let num_cores = {
         let step = if num_cpus::get() <= 10 { 2 } else { 10 };
-        let num_cores = [1]
-            .into_iter()
-            .chain((step..=num_cpus::get()).step_by(step));
-        let cores_2p = [2 * num_cores.clone().last().unwrap()];
-        num_cores.chain(cores_2p)
+        [1].into_iter()
+            .chain((step..=num_cpus::get()).step_by(step))
     };
 
     for input in all_inputs.iter_mut() {

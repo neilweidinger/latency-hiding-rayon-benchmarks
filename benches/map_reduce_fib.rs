@@ -7,7 +7,7 @@ use std::iter::Iterator;
 // (fib n, serial_cutoff)
 type FibSettings = (u32, u32);
 
-const STACK_SIZE_MB: usize = 16; // set a large stack size to avoid overflow
+const STACK_SIZE_MB: usize = 24; // set a large stack size to avoid overflow
 const LATENCY_MS: [Option<u64>; 4] = [None, Some(1), Some(50), Some(100)];
 const LEN: [usize; 1] = [5000];
 const FIB_SETTINGS: [FibSettings; 2] = [(30, 25), (35, 15)];
@@ -57,11 +57,8 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
 
     let num_cores = {
         let step = if num_cpus::get() <= 10 { 2 } else { 10 };
-        let num_cores = [1]
-            .into_iter()
-            .chain((step..=num_cpus::get()).step_by(step));
-        let cores_2p = [2 * num_cores.clone().last().unwrap()];
-        num_cores.chain(cores_2p)
+        [1].into_iter()
+            .chain((step..=num_cpus::get()).step_by(step))
     };
 
     for len in LEN {
