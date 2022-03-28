@@ -31,7 +31,7 @@ where
 
 pub mod map_reduce_fib {
     use crate::fib::fib;
-    use crate::{Joiner, Parallel, Work};
+    use crate::{Joiner, Work};
 
     pub fn map<J: Joiner>(n: u32, work: &Work, serial_cutoff: u32) -> u32 {
         // Possibly do work, if specified, but only in root nodes of computation DAG
@@ -40,7 +40,7 @@ pub mod map_reduce_fib {
         // Do only pure compute in fibonacci
         let fib_work = Work::new(None, None);
 
-        fib::<Parallel>(n, &fib_work, serial_cutoff).0
+        fib::<J>(n, &fib_work, serial_cutoff).0
     }
 
     pub fn reduce(f1: u32, f2: u32) -> u32 {
