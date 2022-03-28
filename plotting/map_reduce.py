@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import json
 import os
 import numpy as np
@@ -7,13 +9,14 @@ import matplotlib.pyplot as plt
 
 target_root = os.path.join(os.getcwd(), 'target/criterion')
 bench_group = os.path.join(target_root, 'MapReduce Fib')
+schedulers = map(lambda s: Path(os.path.join(bench_group, s)), ['Serial', 'Classic', 'Latency Hiding'])
 
 data = [] # list of observation dict rows to be put into a pandas df
 
-for scheduler in os.scandir(bench_group):
-    for bench in os.scandir(scheduler):
+for scheduler_path in os.scandir(bench_group):
+    for bench in filter(lambda dir_entry: dir_entry.name != 'report', os.scandir(scheduler_path)):
         observation = {} # row in pandas df
-        observation['Scheduler'] = scheduler.name
+        observation['Scheduler'] = scheduler_path.name
 
         with open(os.path.join(bench, 'new/benchmark.json')) as f:
             bench_info = json.load(f)
@@ -22,6 +25,8 @@ for scheduler in os.scandir(bench_group):
             for param_string in param_strings:
                 param_name = param_string.split('-')[0].strip()
                 param_value = param_string.split('-')[1].strip()
+                # param_name = param_string.split(':')[0].strip()
+                # param_value = param_string.split(':')[1].strip()
 
                 observation[param_name] = int(param_value) # all param string values are specified as ints
 
@@ -56,7 +61,7 @@ for latency in latencies:
     serial_baseline = serial_baseline.iloc[0]
 
     speedups = latency_view.loc[(latency_view['Scheduler'] != 'Serial'), ['Scheduler', 'Cores', 'Wallclock']]
-    speedups['Speedup'] = speedups['Wallclock'].map(lambda x: serial_baseline / x)
+    speedups['Speedup'] = serial_baseline / speedups['Wallclock']
     print(speedups)
 
     # sns.relplot(data=speedups, x='Cores', y='Speedup', style='Scheduler', hue='Scheduler', kind='line', marker='o')
