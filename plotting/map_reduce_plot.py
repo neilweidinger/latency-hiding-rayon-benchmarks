@@ -31,6 +31,8 @@ for scheduler in os.scandir(bench_group):
 
         if observation['Cores'] == 140:
             continue
+        elif observation['Fib N'] == 35:
+            continue
 
         data.append(observation)
 
@@ -48,7 +50,7 @@ latencies = df.loc[(df['Latency ms'] != 0), 'Latency ms'].unique() # for each la
 sns.set_theme(style="darkgrid")
 
 for latency in latencies:
-    latency_view = df.loc[(((df['Latency ms'] == latency) | (df['Scheduler'] == 'Ideal')) & (df['Fib N'] == 30) & (df['Cutoff'] == 25))]
+    latency_view = df.loc[((df['Latency ms'] == latency) | (df['Scheduler'] == 'Ideal'))]
 
     serial_baseline = latency_view.loc[((latency_view['Scheduler'] == 'Serial') &
                                        (latency_view['Latency ms'] == latency)), 'Wallclock']
