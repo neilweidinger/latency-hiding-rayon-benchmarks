@@ -75,7 +75,7 @@ for latency in latencies:
         plt.plot(lh['Cores'], lh['Speedup'], marker='^', label='Latency Hiding')
         plt.plot(ideal['Cores'], ideal['Speedup'], marker='o', label='Ideal')
 
-        plt.title(f'MapReduceFib with Latency: {latency}')
+        plt.title(f'MapReduceFib with Latency: {latency}ms')
         plt.legend(loc='best')
         plt.xlabel('Logical Cores')
         plt.ylabel(r'Speedup $T_1 / T_P$')

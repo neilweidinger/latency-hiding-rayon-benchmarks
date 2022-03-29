@@ -59,7 +59,7 @@ with sns.axes_style(style="whitegrid"):
     plt.plot(classic['Cores'], classic['Speedup'], marker='D', label='Classic')
     plt.plot(lh['Cores'], lh['Speedup'], marker='^', label='Latency Hiding')
 
-    plt.title(f'Scheduler Overhead Compared to Classic Work Stealing')
+    plt.title(f'Scheduler Overhead Compared to Classic Work Stealing\n(MapReduceFib with 0ms Latency)')
     plt.legend(loc='best')
     plt.xlabel('Logical Cores')
     plt.ylabel(r'Speedup $T_1 / T_P$')
