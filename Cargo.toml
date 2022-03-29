@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rayon = "^1.6.1"
+rayon = "^1.6.1" # getting criterion and this to work seems to depend on removing the links key in rayon-core/Cargo.toml, this also means criterion uses our version of rayon (cargo tree)
 rayon_old = { package = "rayon", git = "https://github.com/rayon-rs/rayon", tag = "v1.5.1" } # pull from git, since we patch regular rayon with crates-io patch
 async-io = "1.6.0"
 async-recursion = "1.0.0"

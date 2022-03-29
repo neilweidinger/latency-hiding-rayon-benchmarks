@@ -32,11 +32,9 @@ for scheduler_path in schedulers:
             bench_results = json.load(f)
             observation['Wallclock'] = bench_results['mean']['point_estimate']
 
-        if observation['Cores'] == 140:
+        if observation['Latency ms'] != 0:
             continue
-        elif observation['Latency ms'] != 0:
-            continue
-        elif observation['Fib N'] == 35:
+        elif not (observation['Fib N'] == 35 and observation['Cutoff'] == 25):
             continue
 
         data.append(observation)
