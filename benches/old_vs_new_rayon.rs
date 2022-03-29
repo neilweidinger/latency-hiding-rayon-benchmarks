@@ -8,8 +8,8 @@ type FibSettings = (u32, u32);
 
 const STACK_SIZE_MB: usize = 24; // set a large stack size to avoid overflow
 const LATENCY_MS: Option<u64> = None; // no latency, test pure compute
-const LEN: usize = 20;
-const FIB_SETTINGS: FibSettings = (10, 25);
+const LEN: usize = 50;
+const FIB_SETTINGS: FibSettings = (30, 25);
 
 fn param_string(
     length: usize,
@@ -57,6 +57,12 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
     let (fib_n, serial_cutoff) = FIB_SETTINGS;
     let mut input = vec![fib_n; LEN];
 
+    let num_cores = {
+        let step = if num_cpus::get() <= 10 { 2 } else { 10 };
+        [1].into_iter()
+            .chain((step..=num_cpus::get()).step_by(step))
+    };
+
     // Serial benchmark
     bench_group.bench_with_input(
         BenchmarkId::new(
@@ -75,65 +81,61 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
         },
     );
 
-    let old_pool = rayon_old::ThreadPoolBuilder::new()
-        .stack_size(STACK_SIZE_MB * 1024 * 1024)
-        .build()
-        .unwrap();
+    for cores in num_cores.clone() {
+        let old_pool = rayon_old::ThreadPoolBuilder::new()
+            .num_threads(cores)
+            .stack_size(STACK_SIZE_MB * 1024 * 1024)
+            .build()
+            .unwrap();
 
-    // Old Rayon benchmark
-    bench_group.bench_with_input(
-        BenchmarkId::new(
-            "Old Rayon",
-            param_string(
-                LEN,
-                LATENCY_MS,
-                old_pool.current_num_threads(),
-                (fib_n, serial_cutoff),
+        // Old Rayon benchmark
+        bench_group.bench_with_input(
+            BenchmarkId::new(
+                "Old Rayon",
+                param_string(LEN, LATENCY_MS, cores, (fib_n, serial_cutoff)),
             ),
-        ),
-        &LATENCY_MS,
-        |b, &l| {
-            old_pool.install(|| {
-                b.iter(|| {
-                    map_reduce_fib::<ParallelOldRayon>(
-                        black_box(&mut input),
-                        black_box(l),
-                        black_box(serial_cutoff),
-                    )
+            &LATENCY_MS,
+            |b, &l| {
+                old_pool.install(|| {
+                    b.iter(|| {
+                        map_reduce_fib::<ParallelOldRayon>(
+                            black_box(&mut input),
+                            black_box(l),
+                            black_box(serial_cutoff),
+                        )
+                    })
                 })
-            })
-        },
-    );
+            },
+        );
 
-    let new_pool = rayon::ThreadPoolBuilder::new()
-        .stack_size(STACK_SIZE_MB * 1024 * 1024)
-        .build()
-        .unwrap();
+        drop(old_pool);
 
-    // New Rayon benchmark
-    bench_group.bench_with_input(
-        BenchmarkId::new(
-            "New Rayon",
-            param_string(
-                LEN,
-                LATENCY_MS,
-                new_pool.current_num_threads(),
-                (fib_n, serial_cutoff),
+        let new_pool = rayon::ThreadPoolBuilder::new()
+            .num_threads(cores)
+            .stack_size(STACK_SIZE_MB * 1024 * 1024)
+            .build()
+            .unwrap();
+
+        // New Rayon benchmark
+        bench_group.bench_with_input(
+            BenchmarkId::new(
+                "New Rayon",
+                param_string(LEN, LATENCY_MS, cores, (fib_n, serial_cutoff)),
             ),
-        ),
-        &LATENCY_MS,
-        |b, &l| {
-            new_pool.install(|| {
-                b.iter(|| {
-                    map_reduce_fib::<Parallel>(
-                        black_box(&mut input),
-                        black_box(l),
-                        black_box(serial_cutoff),
-                    )
+            &LATENCY_MS,
+            |b, &l| {
+                new_pool.install(|| {
+                    b.iter(|| {
+                        map_reduce_fib::<Parallel>(
+                            black_box(&mut input),
+                            black_box(l),
+                            black_box(serial_cutoff),
+                        )
+                    })
                 })
-            })
-        },
-    );
+            },
+        );
+    }
 
     bench_group.finish();
 }

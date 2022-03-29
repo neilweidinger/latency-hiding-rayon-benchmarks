@@ -53,22 +53,15 @@ latencies = df.loc[(df['Latency ms'] != 0), 'Latency ms'].unique() # for each la
 for latency in latencies:
     latency_view = df.loc[((df['Latency ms'] == latency) | (df['Scheduler'] == 'Ideal'))]
 
-    serial_baseline = latency_view.loc[((latency_view['Scheduler'] == 'Serial') &
-                                       (latency_view['Latency ms'] == latency)), 'Wallclock']
+    serial_baseline = latency_view.loc[(latency_view['Scheduler'] == 'Serial'), 'Wallclock']
     assert serial_baseline.size == 1
     serial_baseline = serial_baseline.iloc[0]
 
-    speedups = latency_view.loc[(latency_view['Scheduler'] != 'Serial'), ['Scheduler', 'Cores', 'Wallclock']]
-    speedups['Speedup'] = serial_baseline / speedups['Wallclock']
-    print(speedups)
+    latency_view.loc[:, 'Speedup'] = serial_baseline / latency_view.loc[:, 'Wallclock']
 
-    # sns.relplot(data=speedups, x='Cores', y='Speedup', style='Scheduler', hue='Scheduler', kind='line', marker='o')
-    # plt.title(f'Latency: {latency}')
-    # plt.show()
-
-    ideal = speedups.loc[speedups['Scheduler'] == 'Ideal', ['Cores', 'Speedup']].sort_values(by=['Cores'])
-    classic = speedups.loc[speedups['Scheduler'] == 'Classic', ['Cores', 'Speedup']].sort_values(by=['Cores'])
-    lh = speedups.loc[speedups['Scheduler'] == 'Latency Hiding', ['Cores', 'Speedup']].sort_values(by=['Cores'])
+    ideal = latency_view.loc[latency_view['Scheduler'] == 'Ideal', ['Cores', 'Speedup']].sort_values(by=['Cores'])
+    classic = latency_view.loc[latency_view['Scheduler'] == 'Classic', ['Cores', 'Speedup']].sort_values(by=['Cores'])
+    lh = latency_view.loc[latency_view['Scheduler'] == 'Latency Hiding', ['Cores', 'Speedup']].sort_values(by=['Cores'])
 
     with sns.axes_style(style="whitegrid"):
         plt.plot(classic['Cores'], classic['Speedup'], marker='D', label='Classic')

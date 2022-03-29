@@ -8,8 +8,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 target_root = os.path.join(os.getcwd(), 'target/criterion')
-bench_group = os.path.join(target_root, 'MapReduce Fib')
-schedulers = map(lambda s: Path(os.path.join(bench_group, s)), ['Serial', 'Classic', 'Latency Hiding'])
+bench_group = os.path.join(target_root, 'Old vs New Rayon')
+schedulers = map(lambda s: Path(os.path.join(bench_group, s)), ['Serial', 'Old Rayon', 'New Rayon'])
 
 data = [] # list of observation dict rows to be put into a pandas df
 
@@ -49,17 +49,16 @@ serial_baseline = df.loc[(df['Scheduler'] == 'Serial'), 'Wallclock']
 assert serial_baseline.size == 1
 serial_baseline = serial_baseline.iloc[0]
 
-speedups = df.loc[(df['Scheduler'] != 'Serial'), ['Scheduler', 'Cores', 'Wallclock']]
-speedups['Speedup'] = serial_baseline / speedups['Wallclock']
+df.loc[:, 'Speedup'] = serial_baseline / df.loc[:, 'Wallclock']
 
-classic = speedups.loc[speedups['Scheduler'] == 'Classic', ['Cores', 'Speedup']].sort_values(by=['Cores'])
-lh = speedups.loc[speedups['Scheduler'] == 'Latency Hiding', ['Cores', 'Speedup']].sort_values(by=['Cores'])
+old = df.loc[df['Scheduler'] == 'Old Rayon', ['Cores', 'Speedup']].sort_values(by=['Cores'])
+new = df.loc[df['Scheduler'] == 'New Rayon', ['Cores', 'Speedup']].sort_values(by=['Cores'])
 
 with sns.axes_style(style="whitegrid"):
-    plt.plot(classic['Cores'], classic['Speedup'], marker='D', label='Classic')
-    plt.plot(lh['Cores'], lh['Speedup'], marker='^', label='Latency Hiding')
+    plt.plot(old['Cores'], old['Speedup'], marker='D', label='Classic Scheduler')
+    plt.plot(new['Cores'], new['Speedup'], marker='^', label='ProWS Scheduler')
 
-    plt.title(f'Scheduler Overhead Compared to Classic Work Stealing\n(MapReduceFib with 0ms Latency)')
+    plt.title(f'New ProWS Scheduler Overhead Compared to Old Classic WS Scheduler\n(MapReduceFib with 0ms Latency)')
     plt.legend(loc='best')
     plt.xlabel('Logical Cores')
     plt.ylabel(r'Speedup $T_1 / T_P$')
