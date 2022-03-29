@@ -1,0 +1,11 @@
+group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
+Quicksort,Classic,Length: 10000000 | Latency ms: 0 | Cores: 1,,,731326236.0,ns,1
+Quicksort,Classic,Length: 10000000 | Latency ms: 0 | Cores: 1,,,729622110.0,ns,1
+Quicksort,Classic,Length: 10000000 | Latency ms: 0 | Cores: 1,,,730773831.0,ns,1
+Quicksort,Classic,Length: 10000000 | Latency ms: 0 | Cores: 1,,,735393170.0,ns,1
+Quicksort,Classic,Length: 10000000 | Latency ms: 0 | Cores: 1,,,733407044.0,ns,1
+Quicksort,Classic,Length: 10000000 | Latency ms: 0 | Cores: 1,,,731051603.0,ns,1
+Quicksort,Classic,Length: 10000000 | Latency ms: 0 | Cores: 1,,,727554702.0,ns,1
+Quicksort,Classic,Length: 10000000 | Latency ms: 0 | Cores: 1,,,725525482.0,ns,1
+Quicksort,Classic,Length: 10000000 | Latency ms: 0 | Cores: 1,,,727540487.0,ns,1
+Quicksort,Classic,Length: 10000000 | Latency ms: 0 | Cores: 1,,,727687515.0,ns,1

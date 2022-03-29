@@ -1,0 +1,11 @@
+group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
+Quicksort,Serial,Length: 10000000 | Latency ms: 1 | Cores: 1,,,6075782471.0,ns,1
+Quicksort,Serial,Length: 10000000 | Latency ms: 1 | Cores: 1,,,6105148717.0,ns,1
+Quicksort,Serial,Length: 10000000 | Latency ms: 1 | Cores: 1,,,6080943279.0,ns,1
+Quicksort,Serial,Length: 10000000 | Latency ms: 1 | Cores: 1,,,6072400316.0,ns,1
+Quicksort,Serial,Length: 10000000 | Latency ms: 1 | Cores: 1,,,6051696154.0,ns,1
+Quicksort,Serial,Length: 10000000 | Latency ms: 1 | Cores: 1,,,6116029637.0,ns,1
+Quicksort,Serial,Length: 10000000 | Latency ms: 1 | Cores: 1,,,6093944531.0,ns,1
+Quicksort,Serial,Length: 10000000 | Latency ms: 1 | Cores: 1,,,6025600158.0,ns,1
+Quicksort,Serial,Length: 10000000 | Latency ms: 1 | Cores: 1,,,5978736770.0,ns,1
+Quicksort,Serial,Length: 10000000 | Latency ms: 1 | Cores: 1,,,6099340782.0,ns,1

@@ -1,0 +1,11 @@
+group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
+Quicksort,Latency Hiding,Length: 10000000 | Latency ms: 1 | Cores: 40,,,473361207.0,ns,3
+Quicksort,Latency Hiding,Length: 10000000 | Latency ms: 1 | Cores: 40,,,464701052.0,ns,3
+Quicksort,Latency Hiding,Length: 10000000 | Latency ms: 1 | Cores: 40,,,468779505.0,ns,3
+Quicksort,Latency Hiding,Length: 10000000 | Latency ms: 1 | Cores: 40,,,467541151.0,ns,3
+Quicksort,Latency Hiding,Length: 10000000 | Latency ms: 1 | Cores: 40,,,481466087.0,ns,3
+Quicksort,Latency Hiding,Length: 10000000 | Latency ms: 1 | Cores: 40,,,468105975.0,ns,3
+Quicksort,Latency Hiding,Length: 10000000 | Latency ms: 1 | Cores: 40,,,470520798.0,ns,3
+Quicksort,Latency Hiding,Length: 10000000 | Latency ms: 1 | Cores: 40,,,476033651.0,ns,3
+Quicksort,Latency Hiding,Length: 10000000 | Latency ms: 1 | Cores: 40,,,478175644.0,ns,3
+Quicksort,Latency Hiding,Length: 10000000 | Latency ms: 1 | Cores: 40,,,473799104.0,ns,3

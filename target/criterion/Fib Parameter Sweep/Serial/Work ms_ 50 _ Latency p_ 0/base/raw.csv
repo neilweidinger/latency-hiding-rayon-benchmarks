@@ -1,0 +1,11 @@
+group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
+Fib Parameter Sweep,Serial,Work ms: 50 | Latency p: 0,,,30576062219.0,ns,1
+Fib Parameter Sweep,Serial,Work ms: 50 | Latency p: 0,,,30584625508.0,ns,1
+Fib Parameter Sweep,Serial,Work ms: 50 | Latency p: 0,,,30576664244.0,ns,1
+Fib Parameter Sweep,Serial,Work ms: 50 | Latency p: 0,,,30574440766.0,ns,1
+Fib Parameter Sweep,Serial,Work ms: 50 | Latency p: 0,,,30576788333.0,ns,1
+Fib Parameter Sweep,Serial,Work ms: 50 | Latency p: 0,,,30580276458.0,ns,1
+Fib Parameter Sweep,Serial,Work ms: 50 | Latency p: 0,,,30574471661.0,ns,1
+Fib Parameter Sweep,Serial,Work ms: 50 | Latency p: 0,,,30579627684.0,ns,1
+Fib Parameter Sweep,Serial,Work ms: 50 | Latency p: 0,,,30577273898.0,ns,1
+Fib Parameter Sweep,Serial,Work ms: 50 | Latency p: 0,,,30582371507.0,ns,1
