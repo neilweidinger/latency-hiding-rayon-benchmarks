@@ -104,6 +104,30 @@ impl Joiner for Parallel {
     }
 }
 
+pub struct ParallelOldRayon;
+
+impl Joiner for ParallelOldRayon {
+    #[must_use]
+    fn is_parallel() -> bool {
+        true
+    }
+
+    #[must_use]
+    fn is_latency_hiding() -> bool {
+        false
+    }
+
+    fn join<A, B, RA, RB>(oper_a: A, oper_b: B) -> (RA, RB)
+    where
+        A: FnOnce() -> RA + Send,
+        B: FnOnce() -> RB + Send,
+        RA: Send,
+        RB: Send,
+    {
+        rayon_old::join(oper_a, oper_b)
+    }
+}
+
 pub struct ParallelLH;
 
 impl Joiner for ParallelLH {

@@ -3,7 +3,7 @@ use benchmarks::{Parallel, ParallelLH, Serial, Work};
 use criterion::BatchSize::SmallInput;
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
-const STACK_SIZE_MB: usize = 24; // set a large stack size to avoid overflow
+const STACK_SIZE_MB: usize = 32; // set a large stack size to avoid overflow
 const LATENCY_MS: [Option<u64>; 4] = [None, Some(1), Some(50), Some(100)];
 const LEN: [usize; 1] = [10_000_000];
 

@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rayon = "1.5.1"
+rayon = "^1.6.1"
+rayon_old = { package = "rayon", git = "https://github.com/rayon-rs/rayon", tag = "v1.5.1" } # pull from git, since we patch regular rayon with crates-io patch
 async-io = "1.6.0"
 async-recursion = "1.0.0"
 clap = { version = "3.1.3", features = ["derive"] }
@@ -17,8 +18,7 @@ criterion = "0.3.5"
 num_cpus = "1.13.1"
 
 [patch.crates-io]
-rayon = {path = "../rayon"}
-# rayon = { git = "https://github.com/rayon-rs/rayon", tag = "v1.5.1" }
+rayon = { path = "../rayon" }
 
 [[bench]]
 name = "param_sweep"
@@ -30,6 +30,10 @@ harness = false
 
 [[bench]]
 name = "quicksort"
+harness = false
+
+[[bench]]
+name = "old_vs_new_rayon"
 harness = false
 
 [profile.custom-profile]
