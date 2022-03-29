@@ -23,10 +23,8 @@ for scheduler_path in os.scandir(bench_group):
             param_strings = bench_info['value_str'].split('|')
 
             for param_string in param_strings:
-                param_name = param_string.split('-')[0].strip()
-                param_value = param_string.split('-')[1].strip()
-                # param_name = param_string.split(':')[0].strip()
-                # param_value = param_string.split(':')[1].strip()
+                param_name = param_string.split(':')[0].strip()
+                param_value = param_string.split(':')[1].strip()
 
                 observation[param_name] = int(param_value) # all param string values are specified as ints
 

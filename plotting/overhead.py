@@ -23,10 +23,8 @@ for scheduler_path in schedulers:
             param_strings = bench_info['value_str'].split('|')
 
             for param_string in param_strings:
-                param_name = param_string.split('-')[0].strip()
-                param_value = param_string.split('-')[1].strip()
-                # param_name = param_string.split(':')[0].strip()
-                # param_value = param_string.split(':')[1].strip()
+                param_name = param_string.split(':')[0].strip()
+                param_value = param_string.split(':')[1].strip()
 
                 observation[param_name] = int(param_value) # all param string values are specified as ints
 
@@ -52,7 +50,6 @@ assert serial_baseline.size == 1
 serial_baseline = serial_baseline.iloc[0]
 
 speedups = df.loc[(df['Scheduler'] != 'Serial'), ['Scheduler', 'Cores', 'Wallclock']]
-speedups['Speedup'] = speedups['Wallclock'].map(lambda x: serial_baseline / x)
 speedups['Speedup'] = serial_baseline / speedups['Wallclock']
 
 classic = speedups.loc[speedups['Scheduler'] == 'Classic', ['Cores', 'Speedup']].sort_values(by=['Cores'])
@@ -62,7 +59,7 @@ with sns.axes_style(style="whitegrid"):
     plt.plot(classic['Cores'], classic['Speedup'], marker='D', label='Classic')
     plt.plot(lh['Cores'], lh['Speedup'], marker='^', label='Latency Hiding')
 
-    plt.title(f'Overhead')
+    plt.title(f'Scheduler Overhead Compared to Classic Work Stealing')
     plt.legend(loc='best')
     plt.xlabel('Logical Cores')
     plt.ylabel(r'Speedup $T_1 / T_P$')
