@@ -8,7 +8,7 @@ type FibSettings = (u32, u32);
 
 const STACK_SIZE_MB: usize = 24; // set a large stack size to avoid overflow
 const LATENCY_MS: Option<u64> = None; // no latency, test pure compute
-const LEN: usize = 50;
+const LEN: usize = 200;
 const FIB_SETTINGS: FibSettings = (30, 25);
 
 fn param_string(
