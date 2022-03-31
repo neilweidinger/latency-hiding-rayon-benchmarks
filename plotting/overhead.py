@@ -34,7 +34,9 @@ for scheduler_path in schedulers:
 
         if observation['Latency ms'] != 0:
             continue
-        elif not (observation['Fib N'] == 35 and observation['Cutoff'] == 25):
+        if observation['Length'] != 200:
+            continue
+        elif not (observation['Fib N'] == 30 and observation['Cutoff'] == 25):
             continue
 
         data.append(observation)
