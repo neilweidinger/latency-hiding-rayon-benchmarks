@@ -31,6 +31,7 @@ fn param_sweep(c: &mut Criterion) {
     // Use all cores available
     rayon::ThreadPoolBuilder::new()
         .stack_size(STACK_SIZE_MB * 1024 * 1024)
+        .pin()
         .build_global()
         .unwrap();
 

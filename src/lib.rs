@@ -168,7 +168,7 @@ pub fn build_global_threadpool(cores: Option<usize>, stack_size: Option<usize>) 
         pool_builder
     };
 
-    pool_builder.build_global().unwrap();
+    pool_builder.pin().build_global().unwrap();
 }
 
 #[derive(Debug)]

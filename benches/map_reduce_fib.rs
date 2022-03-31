@@ -90,6 +90,7 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
                     let pool = rayon::ThreadPoolBuilder::new()
                         .num_threads(cores)
                         .stack_size(STACK_SIZE_MB * 1024 * 1024)
+                        .pin()
                         .build()
                         .unwrap();
 
