@@ -9,7 +9,7 @@ type FibSettings = (u32, u32);
 const STACK_SIZE_MB: usize = 24; // set a large stack size to avoid overflow
 const LATENCY_MS: Option<u64> = None; // no latency, test pure compute
 const LEN: usize = 200;
-const FIB_SETTINGS: FibSettings = (30, 25);
+const FIB_SETTINGS: FibSettings = (35, 25);
 
 fn param_string(
     length: usize,
@@ -58,7 +58,7 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
     let mut input = vec![fib_n; LEN];
 
     let num_cores = {
-        let step = if num_cpus::get() <= 10 { 2 } else { 10 };
+        let step = if num_cpus::get() <= 10 { 2 } else { 5 };
         [1].into_iter()
             .chain((step..=num_cpus::get()).step_by(step))
     };
