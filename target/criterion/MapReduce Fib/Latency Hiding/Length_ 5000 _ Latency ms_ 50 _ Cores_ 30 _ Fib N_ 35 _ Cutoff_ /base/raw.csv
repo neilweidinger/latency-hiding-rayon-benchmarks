@@ -1,0 +1,11 @@
+group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
+MapReduce Fib,Latency Hiding,Length: 5000 | Latency ms: 50 | Cores: 30 | Fib N: 35 | Cutoff: 15,,,39552077335.0,ns,1
+MapReduce Fib,Latency Hiding,Length: 5000 | Latency ms: 50 | Cores: 30 | Fib N: 35 | Cutoff: 15,,,39900626070.0,ns,1
+MapReduce Fib,Latency Hiding,Length: 5000 | Latency ms: 50 | Cores: 30 | Fib N: 35 | Cutoff: 15,,,39506510531.0,ns,1
+MapReduce Fib,Latency Hiding,Length: 5000 | Latency ms: 50 | Cores: 30 | Fib N: 35 | Cutoff: 15,,,39420135094.0,ns,1
+MapReduce Fib,Latency Hiding,Length: 5000 | Latency ms: 50 | Cores: 30 | Fib N: 35 | Cutoff: 15,,,39746199229.0,ns,1
+MapReduce Fib,Latency Hiding,Length: 5000 | Latency ms: 50 | Cores: 30 | Fib N: 35 | Cutoff: 15,,,39026648584.0,ns,1
+MapReduce Fib,Latency Hiding,Length: 5000 | Latency ms: 50 | Cores: 30 | Fib N: 35 | Cutoff: 15,,,39962354034.0,ns,1
+MapReduce Fib,Latency Hiding,Length: 5000 | Latency ms: 50 | Cores: 30 | Fib N: 35 | Cutoff: 15,,,40149881979.0,ns,1
+MapReduce Fib,Latency Hiding,Length: 5000 | Latency ms: 50 | Cores: 30 | Fib N: 35 | Cutoff: 15,,,39323915344.0,ns,1
+MapReduce Fib,Latency Hiding,Length: 5000 | Latency ms: 50 | Cores: 30 | Fib N: 35 | Cutoff: 15,,,39451679523.0,ns,1
