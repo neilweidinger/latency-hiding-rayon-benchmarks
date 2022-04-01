@@ -1,0 +1,11 @@
+group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
+Old vs New Rayon,New Rayon,Length: 200 | Latency ms: 0 | Cores: 45 | Fib N: 30 | Cutoff: 20,,,123659593.0,ns,3
+Old vs New Rayon,New Rayon,Length: 200 | Latency ms: 0 | Cores: 45 | Fib N: 30 | Cutoff: 20,,,248277832.0,ns,6
+Old vs New Rayon,New Rayon,Length: 200 | Latency ms: 0 | Cores: 45 | Fib N: 30 | Cutoff: 20,,,372158051.0,ns,9
+Old vs New Rayon,New Rayon,Length: 200 | Latency ms: 0 | Cores: 45 | Fib N: 30 | Cutoff: 20,,,494576379.0,ns,12
+Old vs New Rayon,New Rayon,Length: 200 | Latency ms: 0 | Cores: 45 | Fib N: 30 | Cutoff: 20,,,619003669.0,ns,15
+Old vs New Rayon,New Rayon,Length: 200 | Latency ms: 0 | Cores: 45 | Fib N: 30 | Cutoff: 20,,,745064531.0,ns,18
+Old vs New Rayon,New Rayon,Length: 200 | Latency ms: 0 | Cores: 45 | Fib N: 30 | Cutoff: 20,,,867346384.0,ns,21
+Old vs New Rayon,New Rayon,Length: 200 | Latency ms: 0 | Cores: 45 | Fib N: 30 | Cutoff: 20,,,992860855.0,ns,24
+Old vs New Rayon,New Rayon,Length: 200 | Latency ms: 0 | Cores: 45 | Fib N: 30 | Cutoff: 20,,,1116729898.0,ns,27
+Old vs New Rayon,New Rayon,Length: 200 | Latency ms: 0 | Cores: 45 | Fib N: 30 | Cutoff: 20,,,1241483444.0,ns,30
