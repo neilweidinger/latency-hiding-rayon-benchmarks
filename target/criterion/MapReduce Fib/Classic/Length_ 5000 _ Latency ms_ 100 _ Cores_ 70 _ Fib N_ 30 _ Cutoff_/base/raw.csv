@@ -1,11 +1,11 @@
 group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
-MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8211880878.0,ns,1
-MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8268763684.0,ns,1
-MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8296664695.0,ns,1
-MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8325759485.0,ns,1
-MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8241816972.0,ns,1
-MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8308127325.0,ns,1
-MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8279009706.0,ns,1
-MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8287185825.0,ns,1
-MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8249943731.0,ns,1
-MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8220073795.0,ns,1
+MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8329741959.0,ns,1
+MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8353292667.0,ns,1
+MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8391285215.0,ns,1
+MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8373087990.0,ns,1
+MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8348675663.0,ns,1
+MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8448570922.0,ns,1
+MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8388950351.0,ns,1
+MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8421564374.0,ns,1
+MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8443833665.0,ns,1
+MapReduce Fib,Classic,Length: 5000 | Latency ms: 100 | Cores: 70 | Fib N: 30 | Cutoff: 25,,,8310727084.0,ns,1

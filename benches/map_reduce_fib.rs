@@ -10,7 +10,7 @@ type FibSettings = (u32, u32);
 const STACK_SIZE_MB: usize = 24; // set a large stack size to avoid overflow
 const LATENCY_MS: [Option<u64>; 4] = [None, Some(1), Some(50), Some(100)];
 const LEN: [usize; 1] = [5000];
-const FIB_SETTINGS: [FibSettings; 2] = [(30, 25), (35, 15)];
+const FIB_SETTINGS: [FibSettings; 1] = [(30, 25)];
 
 fn param_string(
     length: usize,
@@ -56,9 +56,9 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
     let mut bench_group = c.benchmark_group("MapReduce Fib");
 
     let num_cores = {
-        let step = if num_cpus::get() <= 10 { 2 } else { 10 };
-        [1].into_iter()
-            .chain((step..=num_cpus::get()).step_by(step))
+        let step = if num_cpus::get() <= 10 { 2 } else { 5 };
+        [5].into_iter()
+            .chain((10..=num_cpus::get()).step_by(step))
     };
 
     for len in LEN {
@@ -67,22 +67,22 @@ fn map_reduce_fib_bench(c: &mut Criterion) {
 
             for latency_ms in LATENCY_MS {
                 // Serial benchmark
-                bench_group.bench_with_input(
-                    BenchmarkId::new(
-                        "Serial",
-                        param_string(len, latency_ms, 1, (fib_n, serial_cutoff)),
-                    ),
-                    &latency_ms,
-                    |b, &l| {
-                        b.iter(|| {
-                            map_reduce_fib::<Serial>(
-                                black_box(&mut input),
-                                black_box(l),
-                                black_box(serial_cutoff),
-                            )
-                        })
-                    },
-                );
+                // bench_group.bench_with_input(
+                    // BenchmarkId::new(
+                        // "Serial",
+                        // param_string(len, latency_ms, 1, (fib_n, serial_cutoff)),
+                    // ),
+                    // &latency_ms,
+                    // |b, &l| {
+                        // b.iter(|| {
+                            // map_reduce_fib::<Serial>(
+                                // black_box(&mut input),
+                                // black_box(l),
+                                // black_box(serial_cutoff),
+                            // )
+                        // })
+                    // },
+                // );
 
                 // Parallel benchmarks
                 // Setting up and tearing down threadpool in inner loop, but whatever
