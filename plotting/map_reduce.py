@@ -13,7 +13,7 @@ schedulers = map(lambda s: Path(os.path.join(bench_group, s)), ['Serial', 'Class
 
 data = [] # list of observation dict rows to be put into a pandas df
 
-for scheduler_path in os.scandir(bench_group):
+for scheduler_path in filter(lambda dir_entry: dir_entry.name != 'report', os.scandir(bench_group)):
     for bench in filter(lambda dir_entry: dir_entry.name != 'report', os.scandir(scheduler_path)):
         observation = {} # row in pandas df
         observation['Scheduler'] = scheduler_path.name
@@ -32,7 +32,7 @@ for scheduler_path in os.scandir(bench_group):
             bench_results = json.load(f)
             observation['Wallclock'] = bench_results['mean']['point_estimate']
 
-        if observation['Cores'] == 140:
+        if observation['Cores'] > 35:
             continue
         elif observation['Fib N'] == 35:
             continue
@@ -70,7 +70,7 @@ for latency in latencies:
 
         plt.title(f'MapReduceFib with Latency: {latency}ms')
         plt.legend(loc='best')
-        plt.xlabel('Logical Cores')
+        plt.xlabel('Worker Threads')
         plt.ylabel(r'Speedup $T_1 / T_P$')
         sns.despine()
         plt.savefig(f'plotting/plots/map_reduce_plot_latency_{latency}.png', dpi=200)
