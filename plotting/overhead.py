@@ -36,7 +36,11 @@ for scheduler_path in schedulers:
             continue
         if observation['Length'] != 200:
             continue
-        elif not (observation['Fib N'] == 30 and observation['Cutoff'] == 25):
+        if not (observation['Cores'] == 1 or observation['Cores'] % 5 == 0 or observation['Cores'] % 10 == 0):
+            continue
+        if observation['Cores'] > 35:
+            continue
+        elif not (observation['Fib N'] == 35 and observation['Cutoff'] == 25):
             continue
 
         data.append(observation)
@@ -55,12 +59,12 @@ old = df.loc[df['Scheduler'] == 'Old Rayon', ['Cores', 'Speedup']].sort_values(b
 new = df.loc[df['Scheduler'] == 'New Rayon', ['Cores', 'Speedup']].sort_values(by=['Cores'])
 
 with sns.axes_style(style="whitegrid"):
-    plt.plot(old['Cores'], old['Speedup'], marker='D', label='Classic Scheduler')
-    plt.plot(new['Cores'], new['Speedup'], marker='^', label='ProWS Scheduler')
+    plt.plot(old['Cores'], old['Speedup'], marker='D', label='Classic')
+    plt.plot(new['Cores'], new['Speedup'], marker='^', label='ProWS-R')
 
-    plt.title(f'New ProWS Scheduler Overhead Compared to Old Classic WS Scheduler\n(MapReduceFib with 0ms Latency)')
+    plt.title(f'ProWS-R Overhead Compared to Classic WS Scheduler\n(MapReduceFib with 0ms Latency)')
     plt.legend(loc='best')
-    plt.xlabel('Logical Cores')
+    plt.xlabel('Worker Threads')
     plt.ylabel(r'Speedup $T_1 / T_P$')
     sns.despine()
     plt.savefig('plotting/plots/overhead_plot.png', dpi=200)

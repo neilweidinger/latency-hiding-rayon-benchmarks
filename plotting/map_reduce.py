@@ -65,7 +65,7 @@ for latency in latencies:
 
     with sns.axes_style(style="whitegrid"):
         plt.plot(classic['Cores'], classic['Speedup'], marker='D', label='Classic')
-        plt.plot(lh['Cores'], lh['Speedup'], marker='^', label='Latency Hiding')
+        plt.plot(lh['Cores'], lh['Speedup'], marker='^', label='ProWS-R')
         plt.plot(ideal['Cores'], ideal['Speedup'], marker='o', label='Ideal')
 
         plt.title(f'MapReduceFib with Latency: {latency}ms')
