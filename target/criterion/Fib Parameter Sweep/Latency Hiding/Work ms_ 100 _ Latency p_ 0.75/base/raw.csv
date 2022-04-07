@@ -1,0 +1,11 @@
+group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
+Fib Parameter Sweep,Latency Hiding,Work ms: 100 | Latency p: 0.75,,,609086649.0,ns,2
+Fib Parameter Sweep,Latency Hiding,Work ms: 100 | Latency p: 0.75,,,609039669.0,ns,2
+Fib Parameter Sweep,Latency Hiding,Work ms: 100 | Latency p: 0.75,,,609855805.0,ns,2
+Fib Parameter Sweep,Latency Hiding,Work ms: 100 | Latency p: 0.75,,,607963159.0,ns,2
+Fib Parameter Sweep,Latency Hiding,Work ms: 100 | Latency p: 0.75,,,611242287.0,ns,2
+Fib Parameter Sweep,Latency Hiding,Work ms: 100 | Latency p: 0.75,,,615584714.0,ns,2
+Fib Parameter Sweep,Latency Hiding,Work ms: 100 | Latency p: 0.75,,,508667066.0,ns,2
+Fib Parameter Sweep,Latency Hiding,Work ms: 100 | Latency p: 0.75,,,610329155.0,ns,2
+Fib Parameter Sweep,Latency Hiding,Work ms: 100 | Latency p: 0.75,,,611309408.0,ns,2
+Fib Parameter Sweep,Latency Hiding,Work ms: 100 | Latency p: 0.75,,,512245823.0,ns,2
